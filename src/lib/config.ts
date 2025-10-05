@@ -21,7 +21,7 @@ const defaultProjects: ProjectItem[] = [
 
 export const defaultConfig: AppConfig = {
   about: {
-    title: "Hi, I'm Katherine.",
+    title: "Hi, I'm Katherine Fang.",
     intro:
       "UI/UX and Product Designer rooted in the New York City area, graduating from NYU next year. My work blends creativity with strategy, and I'm always eager to collaborate on user-centered projects.",
   },
@@ -29,7 +29,7 @@ export const defaultConfig: AppConfig = {
   contact: {
     email: "katherine77778@outlook.com",
     phone: "+1 857-272-1995",
-    linkedin: "https://www.linkedin.com/in/katherine-fang-927523b338/",
+    linkedin: "https://www.linkedin.com/in/katherine-fang-92752b338/",
   },
   resume: {
     url: "/resume.pdf",

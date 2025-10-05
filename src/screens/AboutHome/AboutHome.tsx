@@ -56,30 +56,29 @@ export const AboutHome = (): JSX.Element => {
   return (
     <div className="bg-white w-full relative">
       <img
-        className="absolute w-[57.25%] h-[318px] top-[151px] left-[256px] pointer-events-none"
+        className="block absolute pointer-events-none w-[85%] sm:w-[65%] md:w-[57.25%] h-[180px] sm:h-[250px] md:h-[318px] top-[70px] sm:top-[120px] md:top-[151px] left-1/2 -translate-x-1/2 md:left-[256px] md:translate-x-0"
         alt="Background gradient"
         src="/rectangle.png"
       />
 
       <header className="relative z-10">
-        <nav className="flex items-center justify-between px-11 py-11">
-          <div className="[font-family:'Inter',Helvetica] font-semibold text-black text-[32px] tracking-[0] leading-[normal]">
+        <nav className="flex items-center px-4 sm:px-6 md:px-11 py-6 sm:py-8 md:py-11">
+          <Link
+            to="/"
+            className="[font-family:'Inter',Helvetica] font-semibold text-black text-[32px] tracking-[0] leading-[normal] hover:opacity-70"
+            aria-label="Back to Home"
+          >
             K
-          </div>
+          </Link>
 
-          <div className="md:hidden">
-            <Button variant="ghost" size="icon" onClick={() => setMenuOpen((o) => !o)} aria-label="Toggle menu">
-              <MenuIcon className="w-6 h-6" />
-            </Button>
-          </div>
-          <div className="hidden md:flex items-center gap-[30px] md:gap-[89px]">
+          <div className="hidden md:flex flex-1 justify-center items-center gap-[30px] md:gap-[89px]">
             {navigationLinks.map((link, index) => (
               <a
                 key={index}
                 href={link.href}
                 className={cn(
                   "[font-family:'Inter',Helvetica] font-medium text-black text-xl md:text-2xl tracking-[0] leading-[normal] hover:opacity-70 transition-opacity",
-                  activeSection === link.href.slice(1) ? "underline" : "",
+                  activeSection === link.href.slice(1) && link.label !== "About" ? "underline" : "",
                 )}
                 aria-current={activeSection === link.href.slice(1) ? "page" : undefined}
               >
@@ -87,10 +86,16 @@ export const AboutHome = (): JSX.Element => {
               </a>
             ))}
           </div>
+
+          <div className="md:hidden ml-auto">
+            <Button variant="ghost" size="icon" onClick={() => setMenuOpen((o) => !o)} aria-label="Toggle menu">
+              <MenuIcon className="w-6 h-6" />
+            </Button>
+          </div>
         </nav>
 
         {menuOpen && (
-          <div className="md:hidden px-11 pb-4">
+          <div className="md:hidden px-4 pb-4">
             <div className="flex flex-col gap-3">
               {navigationLinks.map((link, index) => (
                 <a
@@ -109,25 +114,28 @@ export const AboutHome = (): JSX.Element => {
           </div>
         )}
 
-        <img
-          className="w-full h-[3px] object-cover"
-          alt="Divider line"
-          src="/line-1.svg"
-        />
+        {false && (
+          <img
+            className="w-full h-[3px] object-cover"
+            alt="Divider line"
+            src="/line-1.svg"
+          />
+        )}
       </header>
 
       <main className="relative">
-        <section id="about" className="px-4 md:px-[151px] pt-[179px] pb-[245px]">
-          <h1 className="[font-family:'Inter',Helvetica] font-extrabold text-black text-[64px] tracking-[0] leading-[normal] mb-[158px]">
-            {config.about.title}
-          </h1>
-
-          <p className="w-[934px] [font-family:'Inter',Helvetica] font-medium text-black text-[28px] tracking-[0] leading-[normal]">
-            {config.about.intro}
-          </p>
+        <section id="about" className="px-4 sm:px-6 md:px-[151px] pt-[90px] sm:pt-[110px] md:pt-[179px] pb-[140px] sm:pb-[160px] md:pb-[245px]">
+          <div className="max-w-[934px] mx-auto">
+            <h1 className="[font-family:'Inter',Helvetica] font-extrabold text-black text-left text-[40px] md:text-[64px] tracking-[0] leading-[normal] mb-[80px] md:mb-[158px]">
+              {config.about.title}
+            </h1>
+            <p className="[font-family:'Inter',Helvetica] font-medium text-black text-left text-base sm:text-lg md:text-[28px] tracking-[0] leading-[normal]">
+              {config.about.intro}
+            </p>
+          </div>
         </section>
 
-        <section id="project" className="px-4 md:px-[151px] pb-[400px]">
+        <section id="project" className="px-4 sm:px-6 md:px-[151px] pb-[160px] sm:pb-[180px] md:pb-[400px]">
           <h2 className="[font-family:'Inter',Helvetica] font-medium text-black text-2xl tracking-[0] leading-[normal] mb-[52px] text-left">
             Project.
           </h2>
@@ -138,7 +146,7 @@ export const AboutHome = (): JSX.Element => {
                 key={project.id}
                 to={`/project/${project.id}`}
                 className={cn(
-                  "w-full sm:w-[400px] h-[300px] sm:h-[400px] bg-neutral-100 flex items-center justify-center relative overflow-visible rounded-xl shadow-sm hover:shadow-lg transition-shadow hover:z-50 transform-gpu transition-transform transition-opacity duration-200 ease-out",
+                  "w-full sm:w-[360px] md:w-[400px] h-[260px] sm:h-[340px] md:h-[400px] bg-neutral-100 flex items-center justify-center relative overflow-visible rounded-xl shadow-sm hover:shadow-lg transition-shadow hover:z-50 transform-gpu transition-transform transition-opacity duration-200 ease-out",
                   hoverProjectIndex !== null && hoverProjectIndex !== index
                     ? "opacity-50 blur-sm scale-90"
                     : "opacity-100 blur-0 scale-100",
@@ -146,8 +154,8 @@ export const AboutHome = (): JSX.Element => {
               >
                 <div
                   className={cn(
-                    "relative w-[371px] h-[203px] transform-gpu transition-transform duration-200 ease-out origin-center",
-                    hoverProjectIndex === index ? "scale-[3]" : "scale-100",
+                    "relative w-[260px] h-[142px] sm:w-[320px] sm:h-[176px] md:w-[371px] md:h-[203px] transform-gpu transition-transform duration-200 ease-out origin-center",
+                    hoverProjectIndex === index ? "scale-[2]" : "scale-100",
                   )}
                   onMouseEnter={() => setHoverProjectIndex(index)}
                   onMouseLeave={() => setHoverProjectIndex(null)}
@@ -171,7 +179,7 @@ export const AboutHome = (): JSX.Element => {
                       </>
                     );
                   })()}
-                  <div className="absolute top-[11px] left-[42px] w-[287px] h-[180px] overflow-hidden rounded-sm">
+                  <div className="absolute top-[8px] left-[28px] w-[204px] h-[128px] sm:top-[10px] sm:left-[36px] sm:w-[250px] sm:h-[156px] md:top-[11px] md:left-[42px] md:w-[287px] md:h-[180px] overflow-hidden rounded-sm">
                     <img
                       className="w-full h-full object-cover transition-transform duration-300 ease-out transform-gpu origin-center"
                       alt={project.alt || project.title}
@@ -184,24 +192,14 @@ export const AboutHome = (): JSX.Element => {
           </div>
         </section>
 
-        <section id="contact" className="px-4 md:px-[151px] pb-[341px]">
+        <section id="contact" className="px-4 sm:px-6 md:px-[151px] pb-[180px] sm:pb-[200px] md:pb-[341px]">
           <h2 className="[font-family:'Inter',Helvetica] font-medium text-black text-2xl tracking-[0] leading-[normal] mb-[168px]">
             Contact.
           </h2>
 
-          <Card className="w-[686px] mx-auto bg-[#f7f9fb] border-0 rounded-2xl">
+          <Card className="w-full max-w-[686px] mx-auto bg-[#f7f9fb] border-0 rounded-2xl">
             <CardContent className="p-6 relative">
-              <div className="flex gap-2 mb-4">
-                <div className="[font-family:'Source_Code_Pro',Helvetica] font-normal text-[#1c1c1c33] text-xl tracking-[0] leading-5">
-                  1<br />
-                  2<br />
-                  3<br />
-                  4<br />
-                  5<br />
-                  6<br />
-                  7<br />8
-                </div>
-
+              <div className="mb-4">
                 <div className="[font-family:'Source_Code_Pro',Helvetica] font-normal text-lg tracking-[0] leading-[18px]">
                   <span className="text-[#1c1c1c66] leading-5">
                     // E-mail address
@@ -309,36 +307,41 @@ export const AboutHome = (): JSX.Element => {
       </main>
 
       <footer className="relative">
-        <img
-          className="w-full h-[369px] object-cover"
-          alt="Footer gradient background"
-          src="/-----x3d----9-9------.png"
-        />
+         <img
+           className="w-full h-[200px] sm:h-[240px] md:h-[369px] object-cover"
+           alt="Footer gradient background"
+           src="/-----x3d----9-9------.png"
+         />
 
-        <a
-          href="/contact"
-          className="absolute top-[29px] left-[102px] w-[167px] h-[70px] bg-white shadow-[0px_4px_4px_#00000040] flex items-center justify-center hover:opacity-80 transition-opacity"
-        >
-          <span className="[font-family:'Inter',Helvetica] font-medium text-black text-xl tracking-[0] leading-[normal] whitespace-nowrap">
-            Get in touch
-          </span>
-        </a>
-
-        <div className="absolute top-[55px] left-[299px] flex items-center gap-[30px]">
-          <div className="w-[15px] h-[15px] bg-black rounded-[7.5px]" />
-          <span className="[font-family:'Inter',Helvetica] font-medium text-black text-2xl tracking-[0] leading-[normal]">
-            Available for work
-          </span>
+        <div className="absolute inset-0 px-4 sm:px-6 md:px-[151px] flex items-center justify-center md:justify-start gap-3 md:gap-4">
+          <a
+            href="/contact"
+            className="w-[167px] h-[56px] md:h-[70px] bg-white shadow-[0px_4px_4px_#00000040] flex items-center justify-center hover:opacity-80 transition-opacity md:ml-3"
+          >
+            <span className="[font-family:'Inter',Helvetica] font-medium text-black text-lg md:text-xl tracking-[0] leading-[normal] whitespace-nowrap">
+              Get in touch
+            </span>
+          </a>
+          <div className="flex flex-col items-start gap-2 md:gap-3">
+            <a
+              href={config.contact.linkedin}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-[12px] md:gap-[30px] hover:opacity-70 transition-opacity"
+            >
+              <div className="w-[12px] h-[12px] md:w-[15px] md:h-[15px] bg-black rounded-full" />
+              <span className="[font-family:'Inter',Helvetica] font-medium text-black text-xl md:text-2xl tracking-[0] leading-[normal]">
+                Linkedin
+              </span>
+            </a>
+            <div className="flex items-center gap-[12px] md:gap-[30px]">
+              <div className="w-[12px] h-[12px] md:w-[15px] md:h-[15px] bg-black rounded-full" />
+              <span className="[font-family:'Inter',Helvetica] font-medium text-black text-xl md:text-2xl tracking-[0] leading-[normal]">
+                Available for work
+              </span>
+            </div>
+          </div>
         </div>
-
-        <a
-          href={config.contact.linkedin}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="absolute top-[29px] right-[195px] [font-family:'Inter',Helvetica] font-medium text-black text-xl tracking-[0] leading-[normal] whitespace-nowrap hover:opacity-70 transition-opacity"
-        >
-          Linkedin
-        </a>
       </footer>
 
       {showContactModal && (
