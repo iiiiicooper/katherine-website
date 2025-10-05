@@ -1,0 +1,13 @@
+type(scope): subject
+
+Body: what and why. Wrap at 72 chars.
+
+Footer: breaking changes, closes issues, etc.
+
+# 示例
+# feat(Project): 支持项目详情筛选
+# 
+# 添加筛选条件组件，并接入后端查询接口；优化请求防抖。
+# 
+# BREAKING CHANGE: 重命名 query 参数 `filter` -> `q`
+# Closes #123
