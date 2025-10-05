@@ -1,4 +1,4 @@
-export const config = { runtime: "edge" };
+export const config = { runtime: "nodejs" };
 
 type Status = "unread" | "replied";
 type Message = {
@@ -21,6 +21,15 @@ import { put, list, del } from "@vercel/blob";
 
 const token: string | undefined =
   (globalThis as any)?.process?.env?.BLOB_READ_WRITE_TOKEN ?? (globalThis as any)?.BLOB_READ_WRITE_TOKEN;
+
+async function putJsonPrivate(path: string, json: string) {
+  return put(path, json, {
+    contentType: "application/json",
+    access: "private" as any,
+    addRandomSuffix: false,
+    token,
+  } as any);
+}
 
 export default async function handler(req: Request): Promise<Response> {
   if (req.method === "OPTIONS") {
@@ -63,12 +72,7 @@ export default async function handler(req: Request): Promise<Response> {
         preferredChannel: body.preferredChannel as any,
         status: "unread",
       };
-      await put(`messages/${msg.id}.json`, JSON.stringify(msg), {
-        contentType: "application/json",
-        access: "private",
-        addRandomSuffix: false,
-        token,
-      });
+      await putJsonPrivate(`messages/${msg.id}.json`, JSON.stringify(msg));
       return json({ ok: true, data: msg }, 201);
     }
 
@@ -85,12 +89,7 @@ export default async function handler(req: Request): Promise<Response> {
       const current = (await currentRes.json()) as Message;
       const patch = (await req.json()) as Partial<Message>;
       const next: Message = { ...current, ...patch };
-      await put(`messages/${id}.json`, JSON.stringify(next), {
-        contentType: "application/json",
-        access: "private",
-        addRandomSuffix: false,
-        token,
-      });
+      await putJsonPrivate(`messages/${id}.json`, JSON.stringify(next));
       return json({ ok: true, data: next });
     }
 
