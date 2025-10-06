@@ -3,7 +3,7 @@ import React from "react";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent } from "../../components/ui/card";
 import { cn } from "../../lib/utils";
-import { loadConfig } from "../../lib/config";
+import { loadConfig, loadRemoteConfig } from "../../lib/config";
 import { Link } from "react-router-dom";
 
 const navigationLinks = [
@@ -16,7 +16,7 @@ const navigationLinks = [
 // 首页数据从配置读取
 
 export const AboutHome = (): JSX.Element => {
-  const config = React.useMemo(() => loadConfig(), []);
+  const [config, setConfig] = React.useState(() => loadConfig());
   const [copied, setCopied] = React.useState(false);
   const [showContactModal, setShowContactModal] = React.useState(false);
   const [activeSection, setActiveSection] = React.useState("about");
@@ -35,6 +35,13 @@ export const AboutHome = (): JSX.Element => {
   };
 
   React.useEffect(() => {
+    // 尝试拉取远端配置，成功则更新并保存到本地
+    (async () => {
+      const remote = await loadRemoteConfig();
+      setConfig(remote);
+      try { localStorage.setItem("app-config-v1", JSON.stringify(remote)); } catch {}
+    })();
+
     const ids = ["about", "project", "contact", "resume"];
     const observer = new IntersectionObserver(
       (entries) => {
@@ -183,7 +190,7 @@ export const AboutHome = (): JSX.Element => {
                     <img
                       className="w-full h-full object-cover transition-transform duration-300 ease-out transform-gpu origin-center"
                       alt={project.alt || project.title}
-                      src={project.previewSrc}
+                      src={project.homePreviewSrc ?? project.previewSrc}
                     />
                   </div>
                 </div>
@@ -295,7 +302,7 @@ export const AboutHome = (): JSX.Element => {
               asChild
               className="w-[362px] h-[88px] gap-2 px-10 py-4 rounded-[47px] bg-[linear-gradient(270deg,rgba(238,212,189,1)_0%,rgba(254,159,96,1)_100%)] hover:opacity-90 transition-opacity"
             >
-              <a href={config.resume.fileDataUrl || config.resume.url || "#"} download>
+              <a href={(config.resume as any).fileUrl || config.resume.fileDataUrl || "#"} download>
                 <span className="[font-family:'Inter',Helvetica] font-bold text-black text-2xl text-center tracking-[0] leading-[normal]">
                   Download My CV
                 </span>

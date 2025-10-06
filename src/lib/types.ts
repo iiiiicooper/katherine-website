@@ -7,6 +7,8 @@ export type Asset = {
   thumbSrc?: string; // optional thumbnail
   alt?: string;
   caption?: string;
+  // 可选：按百分比控制图片在容器中的显示宽度（默认 100）
+  sizePercent?: number;
   width?: number;
   height?: number;
   fileSize?: number;
@@ -28,6 +30,10 @@ export type ProjectItem = {
   title: string;
   // 新模型：支持可重复集合
   assets?: Asset[];
+  // 资产展示布局：alternating（左右交替）或 vertical（上图下文）
+  assetsLayout?: "alternating" | "vertical";
+  // 纵向模块整体缩放百分比（例如 75 表示整体缩至 75% 宽度）
+  assetsModulePercent?: number;
   copyBlocks?: CopyBlock[];
   slug?: string;
   status?: ProjectStatus;
@@ -40,31 +46,33 @@ export type ProjectItem = {
   timeline?: string;
   // 兼容旧字段（保留以便平滑迁移）
   previewSrc: string; // data URL or path in public
+  // 首页卡片专用缩略图（不影响详情页）
+  homePreviewSrc?: string;
   liveUrl?: string; // external link for "See it live"
   alt?: string;
   shortDesc?: string;
   gallery?: string[];
   caseStudySections?: { heading: string; text: string }[];
+  // 新增：Logo 与 UI 展示支持
+  logoUrl?: string;
+  uiSections?: { title: string; content: string; images?: string[]; order?: number }[];
+  uiGallery?: string[];
 };
 
 export type AppConfig = {
   about: {
     title: string;
     intro: string;
-    avatarUrl?: string;
-    coverUrl?: string;
   };
   projects: ProjectItem[];
   contact: {
     email: string;
     phone: string;
     linkedin: string;
-    preferredChannel?: "email" | "phone" | "linkedin";
   };
   resume: {
-    url?: string; // e.g. /resume.pdf
     fileDataUrl?: string; // optional base64 data URL
-    version?: string;
+    fileUrl?: string; // public URL stored in Blob
   };
 };
 

@@ -1,14 +1,14 @@
 import React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
+// 移除卡片容器相关导入
 import { Button } from "../../components/ui/button";
-import { loadConfig } from "../../lib/config";
+import { loadConfig, loadRemoteConfig } from "../../lib/config";
 import { addMessage } from "../../lib/messages";
 import { Link } from "react-router-dom";
 import { Menu as MenuIcon } from "lucide-react";
 import { cn } from "../../lib/utils";
 
 export const ContactHome = (): JSX.Element => {
-  const cfg = React.useMemo(() => loadConfig(), []);
+  const [cfg, setCfg] = React.useState(() => loadConfig());
   const [menuOpen, setMenuOpen] = React.useState(false);
   const navigationLinks = [
     { label: "About", to: "/#about" },
@@ -19,33 +19,47 @@ export const ContactHome = (): JSX.Element => {
   const [name, setName] = React.useState("");
   const [email, setEmail] = React.useState("");
   const [content, setContent] = React.useState("");
-  const [channel, setChannel] = React.useState<"email" | "phone" | "linkedin">("email");
   const [submitted, setSubmitted] = React.useState<string>("");
-  const [errors, setErrors] = React.useState<{ name?: string; email?: string; content?: string; channel?: string }>({});
+  const [errors, setErrors] = React.useState<{ name?: string; email?: string; content?: string }>({});
+
+  // 组件挂载时拉取远端配置，成功后更新本地与状态
+  React.useEffect(() => {
+    (async () => {
+      try {
+        const remote = await loadRemoteConfig();
+        setCfg(remote);
+        try {
+          localStorage.setItem("app-config-v1", JSON.stringify(remote));
+        } catch {
+          // ignore localStorage errors
+        }
+      } catch {
+        // ignore fetch errors
+      }
+    })();
+  }, []);
 
   const handleSubmit = (): void => {
     const nextErrors: typeof errors = {};
-    if (!name.trim()) nextErrors.name = "请输入姓名";
+    if (!name.trim()) nextErrors.name = "Please enter your name";
     const emailVal = email.trim();
-    if (!emailVal) nextErrors.email = "请输入邮箱";
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)) nextErrors.email = "邮箱格式不正确";
-    if (!content.trim()) nextErrors.content = "请输入内容";
-    if (!channel) nextErrors.channel = "请选择联系渠道";
+    if (!emailVal) nextErrors.email = "Please enter your email";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)) nextErrors.email = "Invalid email format";
+    if (!content.trim()) nextErrors.content = "Please enter your message";
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) {
-      setSubmitted("请修正红色字段后的错误再提交");
+      setSubmitted("Please fix the highlighted errors and submit again");
       return;
     }
-    const payload = { name: name.trim(), email: emailVal, content: content.trim(), preferredChannel: channel };
+    const payload = { name: name.trim(), email: emailVal, content: content.trim() };
     const clearForm = (): void => {
       setName("");
       setEmail("");
       setContent("");
-      setChannel("email");
-      setSubmitted("已提交，我们会尽快联系你～");
+      setSubmitted("Submitted. We'll contact you soon.");
       setTimeout(() => setSubmitted(""), 2000);
     };
-    // 优先尝试调用后端 API
+    // Prefer calling backend API first
     (async () => {
       try {
         const res = await fetch("/api/messages", {
@@ -60,12 +74,12 @@ export const ContactHome = (): JSX.Element => {
       } catch {
         // ignore
       }
-      // 回退到本地存储
+      // Fallback to local storage
       try {
         addMessage(payload);
         clearForm();
       } catch {
-        setSubmitted("提交失败，请稍后再试");
+        setSubmitted("Submission failed. Please try again later");
       }
     })();
   };
@@ -120,21 +134,19 @@ export const ContactHome = (): JSX.Element => {
         )}
       </header>
 
-      {/* 中间内容：表单居中 */}
-      <main className="px-4 sm:px-6 md:px-[151px] py-10">
-        <h1 className="text-3xl font-bold mb-6 text-center">Get in touch</h1>
-        <Card className="w-full max-w-[686px] mx-auto bg-[#f7f9fb] border-0 rounded-2xl">
-        <CardContent>
+      {/* 中间内容：表单居中并整体下移 */}
+      <main className="px-4 sm:px-6 md:px-[151px] pt-24 sm:pt-32 md:pt-48 pb-16">
+        <div className="w-full max-w-[686px] mx-auto">
           <div className="space-y-3">
             <input
-              className="w-full h-[88px] bg-[#f7f7f7] rounded px-6 text-gray-600 placeholder:text-gray-500"
+              className="w-full h-[88px] bg-white border border-gray-200 rounded px-6 text-gray-700 placeholder:text-gray-500"
               placeholder="Your Name"
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
             {errors.name && <div className="text-red-500 text-sm">{errors.name}</div>}
             <input
-              className="w-full h-[88px] bg-[#f7f7f7] rounded px-6 text-gray-600 placeholder:text-gray-500"
+              className="w-full h-[88px] bg-white border border-gray-200 rounded px-6 text-gray-700 placeholder:text-gray-500"
               placeholder="Your E-mail"
               type="email"
               value={email}
@@ -142,32 +154,18 @@ export const ContactHome = (): JSX.Element => {
             />
             {errors.email && <div className="text-red-500 text-sm">{errors.email}</div>}
             <textarea
-              className="w-full h-[220px] bg-[#f7f7f7] rounded px-6 py-4 text-gray-600 placeholder:text-gray-500"
+              className="w-full h-[220px] bg-white border border-gray-200 rounded px-6 py-4 text-gray-700 placeholder:text-gray-500"
               placeholder="Your Masterpiece Start Here"
               value={content}
               onChange={(e) => setContent(e.target.value)}
             />
             {errors.content && <div className="text-red-500 text-sm">{errors.content}</div>}
-            <div className="flex items-center gap-2">
-              <label className="text-sm">偏好联系渠道</label>
-              <select
-                className="border rounded px-2 py-1"
-                value={channel}
-                onChange={(e) => setChannel(e.target.value as any)}
-              >
-                <option value="email">E-mail</option>
-                <option value="phone">Phone</option>
-                <option value="linkedin">LinkedIn</option>
-              </select>
-            </div>
-            {errors.channel && <div className="text-red-500 text-sm">{errors.channel}</div>}
             <div className="flex items-center gap-3">
               {submitted && <span className="text-sm text-muted-foreground">{submitted}</span>}
               <Button className="ml-auto" onClick={handleSubmit}>Submit</Button>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
       </main>
 
       {/* 底部菜单（与 AboutHome 保持一致样式） */}
