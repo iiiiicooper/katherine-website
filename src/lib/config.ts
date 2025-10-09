@@ -55,7 +55,6 @@ const defaultProjects: ProjectItem[] = [
     role: "Designer",
     tools: ["Figma", "Photoshop"],
     timeline: "2023",
-    assetsLayout: "vertical",
     assets: [
       { id: "p2-a1", src: "/p2-1.png", alt: "Project 2 UI 1", caption: "AI-driven legal workflow: defining the product architecture and capabilities—including intelligent chat, document drafting, legal research, smart contracts, and element-based document assembly." },
       { id: "p2-a2", src: "/p2-2.png", alt: "Project 2 UI 2", caption: "Generate different types of legal documents and contracts." },

@@ -63,7 +63,7 @@ export const AboutHome = (): JSX.Element => {
   return (
     <div className="bg-white w-full relative">
       <img
-        className="block absolute pointer-events-none w-[85%] sm:w-[65%] md:w-[57.25%] h-[180px] sm:h-[250px] md:h-[318px] top-[70px] sm:top-[120px] md:top-[151px] left-1/2 -translate-x-1/2 md:left-[256px] md:translate-x-0"
+        className="block absolute pointer-events-none w-[85%] sm:w-[65%] md:w-[57.25%] h-[180px] sm:h-[250px] md:h-[318px] top-[100px] sm:top-[136px] md:top-[151px] left-[52%] sm:left-[54%] -translate-x-1/2 md:left-[256px] md:translate-x-0"
         alt="Background gradient"
         src="/rectangle.png"
       />
@@ -131,7 +131,7 @@ export const AboutHome = (): JSX.Element => {
       </header>
 
       <main className="relative">
-        <section id="about" className="px-4 sm:px-6 md:px-[151px] pt-[90px] sm:pt-[110px] md:pt-[179px] pb-[140px] sm:pb-[160px] md:pb-[245px]">
+        <section id="about" className="px-4 sm:px-6 md:px-[151px] pt-[100px] sm:pt-[118px] md:pt-[179px] pb-[140px] sm:pb-[160px] md:pb-[245px]">
           <div className="max-w-[934px] mx-auto">
             <h1 className="[font-family:'Inter',Helvetica] font-extrabold text-black text-left text-[40px] md:text-[64px] tracking-[0] leading-[normal] mb-[80px] md:mb-[158px]">
               {config.about.title}
@@ -292,7 +292,7 @@ export const AboutHome = (): JSX.Element => {
           </Card>
         </section>
 
-        <section id="resume" className="px-4 md:px-[151px] pb-[288px]">
+        <section id="resume" className="px-4 md:px-[151px] pb-[138px]">
           <h2 className="[font-family:'Inter',Helvetica] font-medium text-black text-2xl tracking-[0] leading-[normal] mb-[89px]">
             Resume.
           </h2>
@@ -313,9 +313,9 @@ export const AboutHome = (): JSX.Element => {
         </section>
       </main>
 
-      <footer className="relative">
+       <footer className="relative">
          <img
-           className="w-full h-[200px] sm:h-[240px] md:h-[369px] object-cover"
+           className="w-full h-[34vw] sm:h-[28vw] md:h-[22vw] max-h-[369px] object-cover"
            alt="Footer gradient background"
            src="/-----x3d----9-9------.png"
          />

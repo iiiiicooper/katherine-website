@@ -9,6 +9,7 @@ export const ProjectDetail = (): JSX.Element => {
   const { id } = useParams();
   const [cfg, setCfg] = React.useState(() => loadConfig());
   const project = cfg.projects.find((p) => p.id === id);
+  const assets = project?.assets ?? [];
   const [menuOpen, setMenuOpen] = React.useState(false);
   const navigationLinks = [
     { label: "About", to: "/#about" },
@@ -105,17 +106,17 @@ export const ProjectDetail = (): JSX.Element => {
           {(project.id === "p1" || project.id === "p2") ? (
             <div className="mb-12 w-full">
               <div className="w-full">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 items-center justify-items-center">
+                <div className="grid grid-cols-2 gap-[clamp(8px,0.9vw,12px)] items-center justify-items-start">
                   {/* 左侧小缩略图（靠内容区域左侧对齐） */}
                   {project.previewSrc && (
                     <img
                       src={project.previewSrc}
                       alt={project.alt ?? project.title}
-                      className="w-[240px] sm:w-[280px] aspect-square object-cover rounded-xl shadow-sm transform-gpu scale-[1.2] translate-x-2 sm:translate-x-3 origin-left"
+                      className="w-full md:max-w-[280px] lg:max-w-[320px] h-auto object-cover rounded-xl shadow-sm justify-self-start"
                     />
                   )}
                   {/* 右侧标题（使用配置中的标题）*/}
-                  <h1 className="[font-family:'Inter',Helvetica] font-extrabold text-black text-left text-[36px] md:text-[56px] tracking-[0] leading-[1.1]">
+                  <h1 className="[font-family:'Inter',Helvetica] font-extrabold text-black text-left text-[clamp(28px,4.375vw,56px)] tracking-[0] leading-[1.1]">
                     {project.title}
                   </h1>
                 </div>
@@ -129,18 +130,18 @@ export const ProjectDetail = (): JSX.Element => {
               )}
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] gap-10 items-start mb-12">
+            <div className="grid grid-cols-2 gap-[clamp(24px,2vw,40px)] items-center mb-12 justify-items-start">
               {/* 左侧 Logo/封面图 */}
               {project.previewSrc && (
                 <img
                   src={project.previewSrc}
                   alt={project.alt ?? project.title}
-                  className="w-full max-w-[280px] aspect-square object-cover rounded-xl shadow-sm"
+                  className="w-full md:max-w-[280px] lg:max-w-[320px] h-auto object-cover rounded-xl shadow-sm justify-self-start"
                 />
               )}
               {/* 右侧标题与外链按钮 */}
               <div className="flex flex-col gap-6">
-                <h1 className="[font-family:'Inter',Helvetica] font-extrabold text-black text-left text-[36px] md:text-[56px] tracking-[0] leading-[1.1]">
+                <h1 className="[font-family:'Inter',Helvetica] font-extrabold text-black text-left text-[clamp(28px,4.375vw,56px)] tracking-[0] leading-[1.1]">
                   {project.title}
                 </h1>
                 <div>
@@ -155,106 +156,77 @@ export const ProjectDetail = (): JSX.Element => {
           )}
 
           {/* 图文交替：如果存在 assets 列表则按每张图对应文案展示；否则回退到 copyBlocks + previewSrc */}
-          {project.assets && project.assets.length > 0 ? (
+          {assets.length > 0 ? (
             <div className="space-y-14">
-              {(() => {
-                // 计算从第几张开始采用“上下布局”（上：左对齐文案；下：居中图片）
-                const forcedVertical = project.assetsLayout === "vertical";
-                const verticalStartIdx = forcedVertical
-                  ? 0
-                  : project.assets.findIndex((a) => {
-                      const t = `${a.alt ?? ''} ${a.caption ?? ''}`;
-                      return /UI\s*5/i.test(t);
-                    });
-                return project.assets.map((asset, idx) => {
-                  const useVertical = verticalStartIdx >= 0 && idx >= verticalStartIdx;
-                  if (useVertical) {
-                    return (
-                      <div
-                        key={asset.id}
-                        className={forcedVertical ? (idx % 2 === 0 ? "ml-auto" : "mr-auto") : "mx-auto"}
-                        style={{ width: `${project.assetsModulePercent ?? 70}%` }}
-                      >
-                        <div className="flex flex-col gap-6 md:gap-8">
-                          {/* vertical: 根据是否强制纵向决定顺序 */}
-                          {forcedVertical ? (
-                            <>
-                              <div className="w-full flex justify-center">
-                                <img
-                                  src={asset.src}
-                                  alt={asset.alt ?? project.title}
-                                  className="h-auto rounded-xl shadow-sm"
-                                  style={{ width: `${asset.sizePercent ?? 100}%` }}
-                                />
-                              </div>
-                              <p className="[font-family:'Inter',Helvetica] font-medium text-black text-[19px] md:text-[20px] tracking-[0] leading-relaxed text-left">
-                                {asset.caption || asset.alt || project.title}
-                              </p>
-                            </>
-                          ) : (
-                            <>
-                              <p className="[font-family:'Inter',Helvetica] font-medium text-black text-[19px] md:text-[20px] tracking-[0] leading-relaxed text-left">
-                                {asset.caption || asset.alt || project.title}
-                              </p>
-                              <div className="w-full flex justify-center">
-                                <img
-                                  src={asset.src}
-                                  alt={asset.alt ?? project.title}
-                                  className="h-auto rounded-xl shadow-sm"
-                                  style={{ width: `${asset.sizePercent ?? 100}%` }}
-                                />
-                              </div>
-                            </>
-                          )}
-                        </div>
+              {assets.map((asset, idx) => (
+                <div key={asset.id} className="max-w-[clamp(320px,90vw,1075px)] mr-auto">
+                  {(((asset.caption || asset.alt || '').toLowerCase().includes('social media background design')) ||
+                    ((asset.caption || asset.alt || '').toLowerCase().includes('product function poster'))) ? (
+                    // 该模块首项：文案在上、图片在下（图片居中）
+                    <div className="grid grid-cols-1 gap-4 md:gap-6 justify-items-start">
+                      <p className="[font-family:'Inter',Helvetica] font-medium text-black text-[clamp(15px,2.2vw,20px)] tracking-[0] leading-relaxed text-left">
+                        {asset.caption || asset.alt || project.title}
+                      </p>
+                      <img
+                        src={asset.src}
+                        alt={asset.alt ?? project.title}
+                        className="w-full h-auto rounded-xl shadow-sm mx-auto justify-self-center"
+                        style={{ width: `${asset.sizePercent ?? 100}%` }}
+                      />
+                    </div>
+                  ) : (
+                    (
+                      (((assets[idx-1]?.caption || assets[idx-1]?.alt || '')?.toLowerCase().includes('social media background design')) ||
+                       ((assets[idx-1]?.caption || assets[idx-1]?.alt || '')?.toLowerCase().includes('product function poster')))
+                    ) ? (
+                      // 该模块后续图片：仅图片，居中展示
+                      <div className="grid grid-cols-1 gap-4 md:gap-6 justify-items-center">
+                        <img
+                          src={asset.src}
+                          alt={asset.alt ?? project.title}
+                          className="w-full h-auto rounded-xl shadow-sm mx-auto justify-self-center"
+                          style={{ width: `${asset.sizePercent ?? 100}%` }}
+                        />
                       </div>
-                    );
-                  }
-                  // 默认：左右交替（偶数靠左、奇数靠右）
-                  return (
-                    <div
-                      key={asset.id}
-                      className={
-                        idx % 2 === 0 ? "max-w-[1075px] mr-auto" : "max-w-[1075px] ml-auto"
-                      }
-                    >
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 items-center">
-                        {(idx % 2 === 0) ? (
+                    ) : (
+                      // 其他项维持左右交替
+                      <div className="grid grid-cols-2 gap-6 items-center justify-items-start">
+                        {idx % 2 === 0 ? (
                           <>
                             <img
                               src={asset.src}
                               alt={asset.alt ?? project.title}
-                              className="h-auto rounded-xl shadow-sm"
+                              className="w-full h-auto rounded-xl shadow-sm"
                               style={{ width: `${asset.sizePercent ?? 100}%` }}
                             />
-                            <p className="[font-family:'Inter',Helvetica] font-medium text-black text-[19px] md:text-[20px] tracking-[0] leading-relaxed">
+                            <p className="[font-family:'Inter',Helvetica] font-medium text-black text-[clamp(15px,2.2vw,20px)] tracking-[0] leading-relaxed text-left">
                               {asset.caption || asset.alt || project.title}
                             </p>
                           </>
                         ) : (
                           <>
-                            <p className="[font-family:'Inter',Helvetica] font-medium text-black text-[19px] md:text-[20px] tracking-[0] leading-relaxed md:order-1">
+                            <p className="[font-family:'Inter',Helvetica] font-medium text-black text-[clamp(15px,2.2vw,20px)] tracking-[0] leading-relaxed text-left">
                               {asset.caption || asset.alt || project.title}
                             </p>
                             <img
                               src={asset.src}
                               alt={asset.alt ?? project.title}
-                              className="h-auto rounded-xl shadow-sm md:order-2"
+                              className="w-full h-auto rounded-xl shadow-sm"
                               style={{ width: `${asset.sizePercent ?? 100}%` }}
                             />
                           </>
                         )}
                       </div>
-                    </div>
-                  );
-                });
-              })()}
+                    )
+                  )}
+                </div>
+              ))}
             </div>
           ) : (
             <>
               {/* 第一块内容：左对齐（再放大约 20%，左右排版） */}
-              <div className="max-w-[1075px] mr-auto mb-14">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 items-center">
+              <div className="max-w-[clamp(320px,90vw,1075px)] mr-auto mb-14">
+                <div className="grid grid-cols-2 gap-6 items-center justify-items-start">
                   {project.previewSrc && (
                     <img
                       src={project.previewSrc}
@@ -263,7 +235,7 @@ export const ProjectDetail = (): JSX.Element => {
                     />
                   )}
                   {!!(project.copyBlocks && project.copyBlocks.length > 0) && (
-                    <p className="[font-family:'Inter',Helvetica] font-medium text-black text-[19px] md:text-[20px] tracking-[0] leading-relaxed">
+                    <p className="[font-family:'Inter',Helvetica] font-medium text-black text-[clamp(15px,2.2vw,20px)] tracking-[0] leading-relaxed">
                       {project.copyBlocks.find((b) => b.kind === "paragraph")?.text}
                     </p>
                   )}
@@ -271,10 +243,10 @@ export const ProjectDetail = (): JSX.Element => {
               </div>
 
               {/* 第二块内容：右对齐（再放大约 20%，左右交替） */}
-              <div className="max-w-[1075px] ml-auto">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 items-center">
+              <div className="max-w-[clamp(320px,90vw,1075px)] mr-auto">
+                <div className="grid grid-cols-2 gap-6 items-center justify-items-start">
                   {!!(project.copyBlocks && project.copyBlocks.length > 1) && (
-                    <p className="[font-family:'Inter',Helvetica] font-medium text-black text-[19px] md:text-[20px] tracking-[0] leading-relaxed md:order-1">
+                    <p className="[font-family:'Inter',Helvetica] font-medium text-black text-[clamp(15px,2.2vw,20px)] tracking-[0] leading-relaxed">
                       {project.copyBlocks.filter((b) => b.kind === "paragraph")[1]?.text}
                     </p>
                   )}
@@ -282,7 +254,7 @@ export const ProjectDetail = (): JSX.Element => {
                     <img
                       src={project.previewSrc}
                       alt={project.alt ?? project.title}
-                      className="w-full h-auto rounded-xl shadow-sm md:order-2"
+                      className="w-full h-auto rounded-xl shadow-sm"
                     />
                   )}
                 </div>
@@ -291,13 +263,13 @@ export const ProjectDetail = (): JSX.Element => {
           )}
 
           {/* UI 展示：若有 assets 已经展示过，则不重复图集；否则展示 gallery */}
-          {!(project.assets && project.assets.length > 0) && (
-            <section className="max-w-[1075px] mx-auto mt-16 md:mt-20">
+          {!(assets.length > 0) && (
+            <section className="max-w-[clamp(320px,90vw,1075px)] mx-auto mt-16 md:mt-20">
               <div className="mb-6 md:mb-8 text-left">
-                <h2 className="[font-family:'Inter',Helvetica] font-bold text-black text-2xl md:text-3xl tracking-[0] leading-[normal]">
+                <h2 className="[font-family:'Inter',Helvetica] font-bold text-black text-[clamp(20px,2.6vw,30px)] tracking-[0] leading-[normal]">
                   UI 设计展示
                 </h2>
-                <p className="[font-family:'Inter',Helvetica] font-medium text-black text-[17px] md:text-[20px] tracking-[0] leading-relaxed mt-3">
+                <p className="[font-family:'Inter',Helvetica] font-medium text-black text-[clamp(15px,2.2vw,20px)] tracking-[0] leading-relaxed mt-3">
                   以下为项目中的部分 UI 设计选段，呈现核心界面与关键交互。文案在上方概述设计目标与思路，图片在下方展示对应的界面效果。
                 </p>
               </div>
