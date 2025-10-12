@@ -31,6 +31,10 @@
   - `outputDirectory`: `dist`
   - `rewrites`: 将非 `/api/*` 路由重写到 `index.html`，用于 SPA。
 
+运行时说明
+- 为保证上传与配置持久化能力，`api/upload.ts`、`api/messages.ts`、`api/config.ts` 使用 Node Runtime（`export const runtime = "nodejs";`）。
+- 如需改用 Edge Runtime，请将持久化改造为基于 Blob 的 HTTP API（纯 `fetch`，不引入 `@vercel/blob` SDK），以避免 Edge 对 Node 依赖的限制。
+
 注意事项
 - 不要手动编辑 `dist/` 文件，构建会覆盖。
 - 修改页面或逻辑请在 `src/` 或 `public/`，然后重新构建。

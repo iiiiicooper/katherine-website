@@ -85,7 +85,7 @@ const DEFAULT_CONFIG = {
   resume: {},
 };
 
-import { put } from "@vercel/blob";
+import { put, list } from "@vercel/blob";
 const token: string | undefined =
   (globalThis as any)?.process?.env?.BLOB_READ_WRITE_TOKEN ?? (globalThis as any)?.BLOB_READ_WRITE_TOKEN;
 
@@ -112,10 +112,14 @@ export default async function handler(req: Request): Promise<Response> {
   try {
     if (req.method === "GET") {
       try {
-        const r = await fetch("https://blob.vercel-storage.com/config/current.json");
-        if (r.ok) {
-          const cfg = await r.json();
-          return jsonResponse({ ok: true, data: cfg });
+        const res = await list({ prefix: "config/current.json", token } as any);
+        const url = res?.blobs?.[0]?.url;
+        if (url) {
+          const r = await fetch(url);
+          if (r.ok) {
+            const cfg = await r.json();
+            return jsonResponse({ ok: true, data: cfg });
+          }
         }
       } catch {}
       // fallback to default when not found
