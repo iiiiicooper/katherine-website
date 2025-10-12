@@ -73,6 +73,8 @@ export type AppConfig = {
   resume: {
     fileDataUrl?: string; // optional base64 data URL
     fileUrl?: string; // public URL stored in Blob
+    fileName?: string; // original file name
+    uploadedAt?: string; // ISO date string when uploaded
   };
 };
 

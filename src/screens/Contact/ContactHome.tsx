@@ -2,7 +2,7 @@ import React from "react";
 // 移除卡片容器相关导入
 import { Button } from "../../components/ui/button";
 import { loadConfig, loadRemoteConfig } from "../../lib/config";
-import { addMessage } from "../../lib/messages";
+import { addMessage, upsertMessage } from "../../lib/messages";
 import { Link } from "react-router-dom";
 import { Menu as MenuIcon } from "lucide-react";
 import { cn } from "../../lib/utils";
@@ -68,6 +68,16 @@ export const ContactHome = (): JSX.Element => {
           body: JSON.stringify(payload),
         });
         if (res.ok) {
+          const data = await res.json();
+          if (data?.ok && data.data) {
+            // 同步写入本地存储，确保后台无远端权限时也可显示
+            try { upsertMessage(data.data); } catch {}
+          }
+          clearForm();
+          return;
+        } else {
+          // 非 2xx 状态：回退写入本地
+          try { addMessage(payload); } catch {}
           clearForm();
           return;
         }
@@ -135,7 +145,7 @@ export const ContactHome = (): JSX.Element => {
       </header>
 
       {/* 中间内容：表单居中并整体下移 */}
-      <main className="px-4 sm:px-6 md:px-[151px] pt-24 sm:pt-32 md:pt-48 pb-16">
+      <main className="px-4 sm:px-6 md:px-[151px] pt-16 sm:pt-24 md:pt-32 pb-12">
         <div className="w-full max-w-[686px] mx-auto">
           <div className="space-y-3">
             <input

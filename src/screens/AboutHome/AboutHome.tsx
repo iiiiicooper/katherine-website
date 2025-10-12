@@ -3,7 +3,7 @@ import React from "react";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent } from "../../components/ui/card";
 import { cn } from "../../lib/utils";
-import { loadConfig, loadRemoteConfig } from "../../lib/config";
+import { loadConfig, loadRemoteConfig, defaultConfig } from "../../lib/config";
 import { Link } from "react-router-dom";
 
 const navigationLinks = [
@@ -38,8 +38,14 @@ export const AboutHome = (): JSX.Element => {
     // 尝试拉取远端配置，成功则更新并保存到本地
     (async () => {
       const remote = await loadRemoteConfig();
-      setConfig(remote);
-      try { localStorage.setItem("app-config-v1", JSON.stringify(remote)); } catch {}
+      const localNow = loadConfig();
+      const isRemoteDefault = JSON.stringify(remote) === JSON.stringify(defaultConfig);
+      if (!isRemoteDefault && JSON.stringify(remote) !== JSON.stringify(localNow)) {
+        setConfig(remote);
+        try { localStorage.setItem("app-config-v1", JSON.stringify(remote)); } catch {}
+      } else {
+        setConfig(localNow);
+      }
     })();
 
     const ids = ["about", "project", "contact", "resume"];
@@ -59,6 +65,37 @@ export const AboutHome = (): JSX.Element => {
       if (el) observer.observe(el);
     });
     return () => observer.disconnect();
+  }, []);
+
+  // 自动刷新：窗口获得焦点或本地存储变化时更新配置，避免简历链接仍指向旧资源
+  React.useEffect(() => {
+    const refresh = async () => {
+      try {
+        const remote = await loadRemoteConfig();
+        const localNow = loadConfig();
+        const isRemoteDefault = JSON.stringify(remote) === JSON.stringify(defaultConfig);
+        if (!isRemoteDefault && JSON.stringify(remote) !== JSON.stringify(localNow)) {
+          setConfig(remote);
+          try { localStorage.setItem("app-config-v1", JSON.stringify(remote)); } catch {}
+        } else {
+          setConfig(localNow);
+        }
+      } catch {
+        try { setConfig(loadConfig()); } catch {}
+      }
+    };
+    const onFocus = () => { refresh(); };
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === "app-config-v1") {
+        try { setConfig(loadConfig()); } catch {}
+      }
+    };
+    window.addEventListener("focus", onFocus);
+    window.addEventListener("storage", onStorage);
+    return () => {
+      window.removeEventListener("focus", onFocus);
+      window.removeEventListener("storage", onStorage);
+    };
   }, []);
   return (
     <div className="bg-white w-full relative">
@@ -142,7 +179,7 @@ export const AboutHome = (): JSX.Element => {
           </div>
         </section>
 
-        <section id="project" className="px-4 sm:px-6 md:px-[151px] pb-[160px] sm:pb-[180px] md:pb-[400px]">
+        <section id="project" className="px-4 sm:px-6 md:px-[151px] pb-[120px] sm:pb-[140px] md:pb-[200px]">
           <h2 className="[font-family:'Inter',Helvetica] font-medium text-black text-2xl tracking-[0] leading-[normal] mb-[52px] text-left">
             Project.
           </h2>
@@ -199,15 +236,15 @@ export const AboutHome = (): JSX.Element => {
           </div>
         </section>
 
-        <section id="contact" className="px-4 sm:px-6 md:px-[151px] pb-[180px] sm:pb-[200px] md:pb-[341px]">
-          <h2 className="[font-family:'Inter',Helvetica] font-medium text-black text-2xl tracking-[0] leading-[normal] mb-[168px]">
+        <section id="contact" className="px-4 sm:px-6 md:px-[151px] pb-[120px] sm:pb-[140px] md:pb-[200px]">
+          <h2 className="[font-family:'Inter',Helvetica] font-medium text-black text-2xl tracking-[0] leading-[normal] mb-[64px]">
             Contact.
           </h2>
 
           <Card className="w-full max-w-[686px] mx-auto bg-[#f7f9fb] border-0 rounded-2xl">
             <CardContent className="p-6 relative">
               <div className="mb-4">
-                <div className="[font-family:'Source_Code_Pro',Helvetica] font-normal text-lg tracking-[0] leading-[18px]">
+                <div className="[font-family:'Source_Code_Pro',Helvetica] font-normal text-base sm:text-lg tracking-[0] leading-[18px] break-words overflow-x-hidden">
                   <span className="text-[#1c1c1c66] leading-5">
                     // E-mail address
                     <br />
@@ -231,7 +268,7 @@ export const AboutHome = (): JSX.Element => {
                     return (
                       <>
                         <span className="text-[#c378ff] leading-5">https:</span>
-                        <span className="text-[#19c59c] leading-5">{rest}<br /></span>
+                        <span className="text-[#19c59c] leading-5 break-all">{rest}<br /></span>
                       </>
                     );
                   })()}
@@ -300,14 +337,47 @@ export const AboutHome = (): JSX.Element => {
           <div className="flex justify-center">
             <Button
               asChild
-              className="w-[362px] h-[88px] gap-2 px-10 py-4 rounded-[47px] bg-[linear-gradient(270deg,rgba(238,212,189,1)_0%,rgba(254,159,96,1)_100%)] hover:opacity-90 transition-opacity"
+              className="w-[260px] h-[56px] sm:w-[320px] sm:h-[72px] md:w-[362px] md:h-[88px] gap-2 px-6 py-3 sm:px-8 sm:py-3 md:px-10 md:py-4 rounded-[36px] sm:rounded-[42px] md:rounded-[47px] bg-[linear-gradient(270deg,rgba(238,212,189,1)_0%,rgba(254,159,96,1)_100%)] hover:opacity-90 transition-opacity"
             >
-              <a href={(config.resume as any).fileUrl || config.resume.fileDataUrl || "#"} download>
-                <span className="[font-family:'Inter',Helvetica] font-bold text-black text-2xl text-center tracking-[0] leading-[normal]">
-                  Download My CV
-                </span>
-                <FileDownIcon className="w-6 h-6" />
-              </a>
+              {(() => {
+                const resumeUrl = (config.resume as any).fileUrl || config.resume.fileDataUrl || "#";
+                const rawName = config.resume.fileName || (() => {
+                  try {
+                    const u = new URL(resumeUrl, window.location.origin);
+                    const seg = u.pathname.split("/").filter(Boolean);
+                    return seg[seg.length - 1] || "CV";
+                  } catch {
+                    return "CV";
+                  }
+                })();
+                const sanitize = (name: string): string => {
+                  // 去除前缀时间戳和多余扩展名，只保留最后一个扩展名
+                  const cleaned = name.replace(/^[0-9]{8,}[-_]/, "");
+                  const lastDot = cleaned.lastIndexOf(".");
+                  let base = lastDot > 0 ? cleaned.slice(0, lastDot) : cleaned;
+                  const ext = lastDot > 0 ? cleaned.slice(lastDot) : "";
+                  // 如果存在 "-时间戳" 后缀，移除
+                  let base2 = base.replace(/-[0-9]{8,}$/, "");
+                  // 若最终扩展名为 .pdf，且 base 以图片扩展名结尾，则去掉内层图片扩展名
+                  if (/^\.pdf$/i.test(ext)) {
+                    base2 = base2.replace(/\.(png|jpg|jpeg|webp|gif)$/i, "");
+                  }
+                  // 压缩连续空格
+                  const base3 = base2.replace(/\s+/g, " ").trim();
+                  // 默认名称前缀
+                  const prefix = "My CV";
+                  return `${base3 || prefix}${ext || ""}`;
+                };
+                const friendlyName = sanitize(rawName);
+                return (
+                  <a href={resumeUrl} download={friendlyName}>
+                    <span className="[font-family:'Inter',Helvetica] font-bold text-black text-lg sm:text-xl md:text-2xl text-center tracking-[0] leading-[normal]">
+                      Download My CV
+                    </span>
+                    <FileDownIcon className="w-5 h-5 sm:w-5 sm:h-5 md:w-6 md:h-6" />
+                  </a>
+                );
+              })()}
             </Button>
           </div>
         </section>

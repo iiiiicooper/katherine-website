@@ -44,6 +44,14 @@ export function setMessageStatus(id: string, status: "unread" | "replied"): void
   saveMessages(list);
 }
 
+// 将服务端返回的完整留言写入/更新到本地存储，便于后台在无远端权限时也能显示
+export function upsertMessage(msg: ContactMessage): void {
+  const list = loadMessages();
+  const idx = list.findIndex((m) => m.id === msg.id);
+  if (idx >= 0) list[idx] = msg; else list.push(msg);
+  saveMessages(list);
+}
+
 export function exportMessagesCSV(): string {
   const list = loadMessages();
   const header = ["id","name","email","content","preferredChannel","status","createdAt"].join(",");
