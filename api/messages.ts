@@ -1,4 +1,4 @@
-export const config = { runtime: "nodejs" };
+export const config = { runtime: "edge" };
 
 type Status = "unread" | "replied";
 type Message = {
@@ -41,21 +41,26 @@ export default async function handler(req: Request): Promise<Response> {
 
   try {
     if (req.method === "GET") {
-      const items = await list({ prefix: "messages/", token });
-      const results: Message[] = [];
-      for (const item of items.blobs) {
-        try {
-          const url = (item as any).downloadUrl ?? item.url;
-          const r = await fetch(url);
-          if (r.ok) {
-            const m = (await r.json()) as Message;
-            results.push(m);
+      try {
+        const items = await list({ prefix: "messages/", token });
+        const results: Message[] = [];
+        for (const item of items.blobs) {
+          try {
+            const url = (item as any).downloadUrl ?? item.url;
+            const r = await fetch(url);
+            if (r.ok) {
+              const m = (await r.json()) as Message;
+              results.push(m);
+            }
+          } catch {
+            // skip
           }
-        } catch {
-          // skip
         }
+        return json({ ok: true, data: results });
+      } catch {
+        // Blob unavailable: return empty list gracefully
+        return json({ ok: true, data: [] });
       }
-      return json({ ok: true, data: results });
     }
 
     if (req.method === "POST") {
@@ -72,31 +77,43 @@ export default async function handler(req: Request): Promise<Response> {
         preferredChannel: body.preferredChannel as any,
         status: "unread",
       };
-      await putJsonPrivate(`messages/${msg.id}.json`, JSON.stringify(msg));
-      return json({ ok: true, data: msg }, 201);
+      try {
+        await putJsonPrivate(`messages/${msg.id}.json`, JSON.stringify(msg));
+        return json({ ok: true, data: msg }, 201);
+      } catch {
+        return json({ ok: false, error: "blob_unavailable" }, 503);
+      }
     }
 
     if (req.method === "PATCH") {
       if (!id) return json({ ok: false, error: "missing_id" }, 400);
       // load existing
       // 通过列表查找现有 blob
-      const items = await list({ prefix: "messages/", token });
-      const item = items.blobs.find((b) => b.pathname === `messages/${id}.json`);
-      if (!item) return json({ ok: false, error: "not_found" }, 404);
-      const currentUrl = (item as any).downloadUrl ?? item.url;
-      const currentRes = await fetch(currentUrl);
-      if (!currentRes.ok) return json({ ok: false, error: "load_failed" }, 500);
-      const current = (await currentRes.json()) as Message;
-      const patch = (await req.json()) as Partial<Message>;
-      const next: Message = { ...current, ...patch };
-      await putJsonPrivate(`messages/${id}.json`, JSON.stringify(next));
-      return json({ ok: true, data: next });
+      try {
+        const items = await list({ prefix: "messages/", token });
+        const item = items.blobs.find((b) => b.pathname === `messages/${id}.json`);
+        if (!item) return json({ ok: false, error: "not_found" }, 404);
+        const currentUrl = (item as any).downloadUrl ?? item.url;
+        const currentRes = await fetch(currentUrl);
+        if (!currentRes.ok) return json({ ok: false, error: "load_failed" }, 500);
+        const current = (await currentRes.json()) as Message;
+        const patch = (await req.json()) as Partial<Message>;
+        const next: Message = { ...current, ...patch };
+        await putJsonPrivate(`messages/${id}.json`, JSON.stringify(next));
+        return json({ ok: true, data: next });
+      } catch {
+        return json({ ok: false, error: "blob_unavailable" }, 503);
+      }
     }
 
     if (req.method === "DELETE") {
       if (!id) return json({ ok: false, error: "missing_id" }, 400);
-      await del(`messages/${id}.json`, { token });
-      return json({ ok: true });
+      try {
+        await del(`messages/${id}.json`, { token });
+        return json({ ok: true });
+      } catch {
+        return json({ ok: false, error: "blob_unavailable" }, 503);
+      }
     }
 
     return json({ ok: false, error: "method_not_allowed" }, 405);

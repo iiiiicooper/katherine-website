@@ -1,4 +1,4 @@
-export const config = { runtime: "nodejs" };
+export const config = { runtime: "edge" };
 
 import { put, list } from "@vercel/blob";
 import { defaultConfig } from "../src/lib/config";
@@ -28,16 +28,20 @@ export default async function handler(req: Request): Promise<Response> {
 
   try {
     if (req.method === "GET") {
-      // load current config
-      const items = await list({ prefix: "config/", token });
-      const current = items.blobs.find((b) => b.pathname === "config/current.json");
-      if (current) {
-        const url = (current as any).downloadUrl ?? current.url;
-        const r = await fetch(url);
-        if (r.ok) {
-          const json = await r.text();
-          return jsonResponse({ ok: true, data: JSON.parse(json) });
+      // load current config (gracefully fall back if Blob not available)
+      try {
+        const items = await list({ prefix: "config/", token });
+        const current = items.blobs.find((b) => b.pathname === "config/current.json");
+        if (current) {
+          const url = (current as any).downloadUrl ?? current.url;
+          const r = await fetch(url);
+          if (r.ok) {
+            const json = await r.text();
+            return jsonResponse({ ok: true, data: JSON.parse(json) });
+          }
         }
+      } catch {
+        // ignore Blob errors and fall back to default
       }
       // fallback to default
       return jsonResponse({ ok: true, data: defaultConfig });
@@ -52,9 +56,14 @@ export default async function handler(req: Request): Promise<Response> {
       } catch {
         return jsonResponse({ ok: false, error: "invalid_json" }, 400);
       }
-      await putJsonPrivate("config/current.json", bodyText);
-      const ts = Date.now();
-      await putJsonPrivate(`config/${ts}.json`, bodyText);
+      try {
+        await putJsonPrivate("config/current.json", bodyText);
+        const ts = Date.now();
+        await putJsonPrivate(`config/${ts}.json`, bodyText);
+      } catch {
+        // Blob unavailable: report non-blocking error so frontend can continue
+        return jsonResponse({ ok: false, error: "blob_unavailable" }, 503);
+      }
       // keep last 3 versions
       try {
         const items = await list({ prefix: "config/", token });
