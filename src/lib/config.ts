@@ -1,4 +1,4 @@
-import { AppConfig, ProjectItem } from "./types";
+import { AppConfig, ProjectItem } from "./types.js";
 
 const STORAGE_KEY = "app-config-v1";
 
