@@ -52,46 +52,23 @@ export const ContactHome = (): JSX.Element => {
       return;
     }
     const payload = { name: name.trim(), email: emailVal, content: content.trim() };
-    const clearForm = (): void => {
-      setName("");
-      setEmail("");
-      setContent("");
-      setSubmitted("Submitted. We'll contact you soon.");
-      setTimeout(() => setSubmitted(""), 2000);
-    };
-    // Prefer calling backend API first
-    (async () => {
-      try {
-        const res = await fetch("/api/messages", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
-        if (res.ok) {
-          const data = await res.json();
-          if (data?.ok && data.data) {
-            // 同步写入本地存储，确保后台无远端权限时也可显示
-            try { upsertMessage(data.data); } catch {}
-          }
-          clearForm();
-          return;
-        } else {
-          // 非 2xx 状态：回退写入本地
-          try { addMessage(payload); } catch {}
-          clearForm();
-          return;
-        }
-      } catch {
-        // ignore
+    // 简化：不依赖后端，直接写入本地留言，并尝试通过邮件通知站点邮箱
+    try { addMessage(payload); } catch {}
+    setName("");
+    setEmail("");
+    setContent("");
+    setSubmitted("Submitted locally. If email didn't open, please contact via email.");
+    setTimeout(() => setSubmitted(""), 3000);
+    // 尝试打开默认邮件客户端，发送到站点配置邮箱
+    try {
+      const to = cfg.contact.email || "";
+      const subject = encodeURIComponent(`[Website Contact] From ${payload.name}`);
+      const body = encodeURIComponent(`Name: ${payload.name}\nEmail: ${payload.email}\n\n${payload.content}`);
+      if (to) {
+        const mailto = `mailto:${to}?subject=${subject}&body=${body}`;
+        window.open(mailto, "_blank");
       }
-      // Fallback to local storage
-      try {
-        addMessage(payload);
-        clearForm();
-      } catch {
-        setSubmitted("Submission failed. Please try again later");
-      }
-    })();
+    } catch {}
   };
 
   return (
