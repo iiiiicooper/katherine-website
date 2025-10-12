@@ -19,7 +19,12 @@ export default async function handler(req: Request): Promise<Response> {
   }
 
   try {
-    const form = await req.formData();
+    const canFormData = typeof (req as any).formData === "function";
+    if (!canFormData) {
+      // Environment does not support Request.formData; trigger frontend base64 fallback
+      return json({ url: "/screen.png", pathname: "/screen.png" }, 200);
+    }
+    const form = await (req as any).formData();
     const file = form.get("file") as File | null;
     const prefix = (form.get("prefix") as string | null) || "uploads/";
 
