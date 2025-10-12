@@ -190,7 +190,7 @@ export const AdminHome = (): JSX.Element => {
         {/* 简历上传 */}
         <Card>
           <CardHeader>
-            <CardTitle>简历上传（≤10MB）</CardTitle>
+            <CardTitle>简历上传（≤10MB，无需后端）</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <input
@@ -203,51 +203,22 @@ export const AdminHome = (): JSX.Element => {
                   alert("文件超过 10MB 限制");
                   return;
                 }
-                // 优先尝试“直传”模式（Option B）：客户端将文件作为请求体发送，后端 Node 直接转发到 Blob
-                let useBase64 = true;
-                try {
-                  const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
-                  const qs = new URLSearchParams({ filename: safeName, prefix: "resume/" });
-                  const resDirect = await fetch(`/api/upload?${qs.toString()}`, {
-                    method: "POST",
-                    headers: { "Content-Type": file.type || "application/octet-stream" },
-                    body: file,
-                  });
-                  if (resDirect.ok) {
-                    const data = await resDirect.json();
-                    const url = data?.url as string | undefined;
-                    if (url && !/\/screen\.png$/.test(url)) {
-                      const next = { ...cfg, resume: { ...cfg.resume, fileUrl: url, fileName: file.name, uploadedAt: new Date().toISOString() } } as typeof cfg;
-                      setCfg(next);
-                      useBase64 = false;
-                    }
-                  }
-                } catch {}
-                // 回退：兼容部分环境的表单上传（如果后端支持 formData）
-                if (useBase64) {
-                  try {
-                    const fd = new FormData();
-                    fd.append("file", file);
-                    fd.append("prefix", "resume/");
-                    const res = await fetch("/api/upload", { method: "POST", body: fd });
-                    if (res.ok) {
-                      const data = await res.json();
-                      const url = data?.url as string | undefined;
-                      if (url && !/\/screen\.png$/.test(url)) {
-                        const next = { ...cfg, resume: { ...cfg.resume, fileUrl: url, fileName: file.name, uploadedAt: new Date().toISOString() } } as typeof cfg;
-                        setCfg(next);
-                        useBase64 = false;
-                      }
-                    }
-                  } catch {}
-                }
-                if (useBase64) {
-                  const b64 = await fileToDataURL(file);
-                  const next = { ...cfg, resume: { ...cfg.resume, fileDataUrl: b64, fileName: file.name, uploadedAt: new Date().toISOString() } } as typeof cfg;
-                  setCfg(next);
-                }
+                // 简化方案：直接使用 base64 存储在配置中，无需调用后端
+                const b64 = await fileToDataURL(file);
+                const next = { ...cfg, resume: { ...cfg.resume, fileDataUrl: b64, fileName: file.name, uploadedAt: new Date().toISOString(), fileUrl: "" } } as typeof cfg;
+                setCfg(next);
               }}
             />
+            <div className="space-y-2">
+              <div className="text-sm text-gray-500">或粘贴公开的简历链接（如 GitHub Releases、Google Drive、Dropbox、CDN）：</div>
+              <input
+                type="url"
+                className="w-full h-10 border rounded px-3"
+                placeholder="https://example.com/your-resume.pdf"
+                value={cfg.resume.fileUrl || ""}
+                onChange={(e) => setCfg({ ...cfg, resume: { ...cfg.resume, fileUrl: e.target.value } })}
+              />
+            </div>
             <div>
               {(() => {
                 const resumeUrl = cfg.resume.fileUrl || cfg.resume.fileDataUrl || "#";
