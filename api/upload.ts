@@ -1,4 +1,4 @@
-export const runtime = 'edge';
+export const runtime = 'nodejs';
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -20,25 +20,48 @@ export default async function handler(req: Request): Promise<Response> {
 
   try {
     const canFormData = typeof (req as any).formData === "function";
-    if (!canFormData) {
-      // Environment does not support Request.formData; trigger frontend base64 fallback
-      return json({ url: "/screen.png", pathname: "/screen.png" }, 200);
-    }
-    const form = await (req as any).formData();
-    const file = form.get("file") as File | null;
-    const prefix = (form.get("prefix") as string | null) || "uploads/";
+    let file: File | null = null;
+    let prefix = "uploads/";
+    let filename: string | null = null;
+    let contentType: string | undefined = undefined;
 
-    if (!file) {
-      return json({ error: "file field is required" }, 400);
+    if (canFormData) {
+      const form = await (req as any).formData();
+      file = form.get("file") as File | null;
+      prefix = (form.get("prefix") as string | null) || "uploads/";
+      contentType = file?.type || undefined;
+      filename = file?.name || null;
+    } else {
+      // Node runtime: parse query for filename/prefix and read raw body
+      const url = new URL(req.url, "http://localhost");
+      filename = url.searchParams.get("filename");
+      prefix = url.searchParams.get("prefix") || "uploads/";
     }
 
+    // Size limit check
     const maxBytes = 10 * 1024 * 1024; // 10MB
-    if (file.size > maxBytes) {
-      return json({ error: "file_too_large", detail: "max 10MB" }, 413);
-    }
+    let key = "";
+    let bodyForUpload: BodyInit;
 
-    const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
-    const key = `${prefix}${Date.now()}_${safeName}`;
+    if (file) {
+      if (file.size > maxBytes) {
+        return json({ error: "file_too_large", detail: "max 10MB" }, 413);
+      }
+      const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+      key = `${prefix}${Date.now()}_${safeName}`;
+      bodyForUpload = file;
+    } else {
+      const buf = await req.arrayBuffer();
+      if (!buf || buf.byteLength === 0) {
+        return json({ error: "empty_body" }, 400);
+      }
+      if (buf.byteLength > maxBytes) {
+        return json({ error: "file_too_large", detail: "max 10MB" }, 413);
+      }
+      const safeName = (filename || `upload_${Date.now()}`).replace(/[^a-zA-Z0-9._-]/g, "_");
+      key = `${prefix}${Date.now()}_${safeName}`;
+      bodyForUpload = Buffer.from(buf);
+    }
 
     try {
       if (!token) throw new Error("missing_token");
@@ -47,11 +70,11 @@ export default async function handler(req: Request): Promise<Response> {
         method: "PUT",
         headers: {
           Authorization: `Bearer ${token}`,
-          "Content-Type": file.type || "application/octet-stream",
+          "Content-Type": contentType || "application/octet-stream",
           // cache up to one year for public assets
           "Cache-Control": "public, max-age=31536000, immutable",
         },
-        body: file,
+        body: bodyForUpload,
       });
       if (!r.ok) throw new Error(`upload_failed_${r.status}`);
       const data = await r.json();

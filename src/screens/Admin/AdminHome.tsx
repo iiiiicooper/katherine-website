@@ -203,25 +203,43 @@ export const AdminHome = (): JSX.Element => {
                   alert("文件超过 10MB 限制");
                   return;
                 }
-                // 优先调用后端上传，若返回占位链接则改用 base64
+                // 优先尝试“直传”模式（Option B）：客户端将文件作为请求体发送，后端 Node 直接转发到 Blob
                 let useBase64 = true;
                 try {
-                  const fd = new FormData();
-                  fd.append("file", file);
-                  fd.append("prefix", "resume/");
-                  const res = await fetch("/api/upload", { method: "POST", body: fd });
-                  if (res.ok) {
-                    const data = await res.json();
+                  const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+                  const qs = new URLSearchParams({ filename: safeName, prefix: "resume/" });
+                  const resDirect = await fetch(`/api/upload?${qs.toString()}`, {
+                    method: "POST",
+                    headers: { "Content-Type": file.type || "application/octet-stream" },
+                    body: file,
+                  });
+                  if (resDirect.ok) {
+                    const data = await resDirect.json();
                     const url = data?.url as string | undefined;
-                    // 若为开发占位图（/screen.png），则不使用该 URL
                     if (url && !/\/screen\.png$/.test(url)) {
                       const next = { ...cfg, resume: { ...cfg.resume, fileUrl: url, fileName: file.name, uploadedAt: new Date().toISOString() } } as typeof cfg;
                       setCfg(next);
                       useBase64 = false;
                     }
                   }
-                } catch {
-                  // 网络异常时改用 base64
+                } catch {}
+                // 回退：兼容部分环境的表单上传（如果后端支持 formData）
+                if (useBase64) {
+                  try {
+                    const fd = new FormData();
+                    fd.append("file", file);
+                    fd.append("prefix", "resume/");
+                    const res = await fetch("/api/upload", { method: "POST", body: fd });
+                    if (res.ok) {
+                      const data = await res.json();
+                      const url = data?.url as string | undefined;
+                      if (url && !/\/screen\.png$/.test(url)) {
+                        const next = { ...cfg, resume: { ...cfg.resume, fileUrl: url, fileName: file.name, uploadedAt: new Date().toISOString() } } as typeof cfg;
+                        setCfg(next);
+                        useBase64 = false;
+                      }
+                    }
+                  } catch {}
                 }
                 if (useBase64) {
                   const b64 = await fileToDataURL(file);
