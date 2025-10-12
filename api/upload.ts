@@ -1,6 +1,6 @@
 import { put } from "@vercel/blob";
 
-export const runtime = 'edge';
+export const runtime = 'nodejs';
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",

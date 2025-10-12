@@ -1,4 +1,4 @@
-export const runtime = "edge";
+export const runtime = "nodejs";
 
 // Avoid importing frontend modules into Edge runtime; define a minimal default here
 const DEFAULT_CONFIG = {
@@ -85,8 +85,7 @@ const DEFAULT_CONFIG = {
   resume: {},
 };
 
-// Edge 环境不使用 Node/undici 依赖，后续如需写入远端存储，
-// 建议改用 Blob 的 HTTP API（纯 fetch 实现），此处暂不引入 SDK。
+import { put } from "@vercel/blob";
 const token: string | undefined =
   (globalThis as any)?.process?.env?.BLOB_READ_WRITE_TOKEN ?? (globalThis as any)?.BLOB_READ_WRITE_TOKEN;
 
@@ -96,10 +95,13 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "Content-Type",
 };
 
-// 暂不直接写入 Blob（避免 Edge 不支持的模块）。
-// 如需持久化，可在后续改为调用 Blob 的 HTTP 接口。
-async function putJsonPrivate(_path: string, _json: string) {
-  throw new Error("blob_unavailable");
+async function putJsonPublic(path: string, json: string) {
+  return put(path, json, {
+    contentType: "application/json",
+    access: "public" as any,
+    addRandomSuffix: false,
+    token,
+  } as any);
 }
 
 export default async function handler(req: Request): Promise<Response> {
@@ -109,7 +111,14 @@ export default async function handler(req: Request): Promise<Response> {
 
   try {
     if (req.method === "GET") {
-      // For Edge compatibility, avoid Blob listing; return default/fallback
+      try {
+        const r = await fetch("https://blob.vercel-storage.com/config/current.json");
+        if (r.ok) {
+          const cfg = await r.json();
+          return jsonResponse({ ok: true, data: cfg });
+        }
+      } catch {}
+      // fallback to default when not found
       return jsonResponse({ ok: true, data: DEFAULT_CONFIG });
     }
 
@@ -123,11 +132,10 @@ export default async function handler(req: Request): Promise<Response> {
         return jsonResponse({ ok: false, error: "invalid_json" }, 400);
       }
       try {
-        await putJsonPrivate("config/current.json", bodyText);
+        await putJsonPublic("config/current.json", bodyText);
         const ts = Date.now();
-        await putJsonPrivate(`config/${ts}.json`, bodyText);
+        await putJsonPublic(`config/${ts}.json`, bodyText);
       } catch {
-        // Blob unavailable: report non-blocking error so frontend can continue
         return jsonResponse({ ok: false, error: "blob_unavailable" }, 503);
       }
       // No listing/cleanup on Edge to avoid unsupported modules
