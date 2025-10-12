@@ -1,6 +1,4 @@
-import { put } from "@vercel/blob";
-
-export const runtime = 'nodejs';
+export const runtime = 'edge';
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -38,20 +36,26 @@ export default async function handler(req: Request): Promise<Response> {
     const key = `${prefix}${Date.now()}_${safeName}`;
 
     try {
-      const { url, pathname } = await put(
-        key,
-        file,
-        {
-          access: "public",
-          addRandomSuffix: false,
-          contentType: file.type || undefined,
-          cacheControlMaxAge: 31536000,
-          token,
-        } as any
-      );
+      if (!token) throw new Error("missing_token");
+      const uploadUrl = `https://blob.vercel-storage.com/${encodeURIComponent(key)}?access=public&addRandomSuffix=false`;
+      const r = await fetch(uploadUrl, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": file.type || "application/octet-stream",
+          // cache up to one year for public assets
+          "Cache-Control": "public, max-age=31536000, immutable",
+        },
+        body: file,
+      });
+      if (!r.ok) throw new Error(`upload_failed_${r.status}`);
+      const data = await r.json();
+      const url = data.url || data.downloadUrl || null;
+      const pathname = data.pathname || null;
+      if (!url || !pathname) throw new Error("invalid_response");
       return json({ url, pathname }, 200);
-    } catch {
-      // Blob unavailable: return placeholder to trigger base64 fallback in UI
+    } catch (e) {
+      // Blob unavailable or upload failed: return placeholder to trigger base64 fallback in UI
       return json({ url: "/screen.png", pathname: "/screen.png" }, 200);
     }
   } catch (err: any) {
