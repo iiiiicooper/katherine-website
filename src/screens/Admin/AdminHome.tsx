@@ -265,6 +265,17 @@ export const AdminHome = (): JSX.Element => {
             <CardTitle>Contact 管理</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
+            {cfg.contact.googleForm?.endpoint && (
+              <div className="p-3 border rounded bg-[#fffdf7] text-sm text-gray-700">
+                已启用 Google Forms 提交。查看实时响应：
+                <a
+                  className="underline ml-1"
+                  href={cfg.contact.googleForm.endpoint.replace("/formResponse", "/viewform")}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >Google Forms</a>
+              </div>
+            )}
             <input
               className="w-full h-10 border rounded px-3"
               placeholder="邮箱"
@@ -283,6 +294,36 @@ export const AdminHome = (): JSX.Element => {
               value={cfg.contact.linkedin}
               onChange={(e) => setCfg({ ...cfg, contact: { ...cfg.contact, linkedin: e.target.value } })}
             />
+            <div className="border-t pt-3 space-y-2">
+              <div className="text-sm text-gray-600">Google Forms（可选）</div>
+              <input
+                className="w-full h-10 border rounded px-3"
+                placeholder="表单提交地址（.../formResponse）"
+                value={cfg.contact.googleForm?.endpoint || ""}
+                onChange={(e) => setCfg({ ...cfg, contact: { ...cfg.contact, googleForm: { ...(cfg.contact.googleForm || {}), endpoint: e.target.value } } })}
+              />
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                <input
+                  className="h-10 border rounded px-3"
+                  placeholder="entry.<name>"
+                  value={cfg.contact.googleForm?.entries?.name || ""}
+                  onChange={(e) => setCfg({ ...cfg, contact: { ...cfg.contact, googleForm: { ...(cfg.contact.googleForm || {}), entries: { ...(cfg.contact.googleForm?.entries || {}), name: e.target.value } } } })}
+                />
+                <input
+                  className="h-10 border rounded px-3"
+                  placeholder="entry.<email>"
+                  value={cfg.contact.googleForm?.entries?.email || ""}
+                  onChange={(e) => setCfg({ ...cfg, contact: { ...cfg.contact, googleForm: { ...(cfg.contact.googleForm || {}), entries: { ...(cfg.contact.googleForm?.entries || {}), email: e.target.value } } } })}
+                />
+                <input
+                  className="h-10 border rounded px-3"
+                  placeholder="entry.<content>"
+                  value={cfg.contact.googleForm?.entries?.content || ""}
+                  onChange={(e) => setCfg({ ...cfg, contact: { ...cfg.contact, googleForm: { ...(cfg.contact.googleForm || {}), entries: { ...(cfg.contact.googleForm?.entries || {}), content: e.target.value } } } })}
+                />
+              </div>
+              <div className="text-xs text-gray-500">提示：在 Google Forms 打开表单，右键检查输入框，复制每个字段的 name（形如 entry.123456）。</div>
+            </div>
             <Button disabled={saving} onClick={() => persistConfig(cfg)}>保存</Button>
           </CardContent>
         </Card>

@@ -77,7 +77,7 @@ export const defaultConfig: AppConfig = {
   about: {
     title: "Hi, I'm Katherine Fang.",
     intro:
-      "UI/UX and Product Designer rooted in the New York City area, graduating from NYU next year. My work blends creativity with strategy, and I'm always eager to collaborate on user-centered projects.",
+      "UI/UX and Product Designer based in New York City, graduating from NYU in 2026. I focus on designing AI and FinTech products that bridge user needs with market opportunities, creating seamless experiences that drive real business impact.",
   },
   projects: defaultProjects,
   contact: {

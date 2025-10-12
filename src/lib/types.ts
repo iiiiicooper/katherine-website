@@ -69,6 +69,14 @@ export type AppConfig = {
     email: string;
     phone: string;
     linkedin: string;
+    googleForm?: {
+      endpoint?: string; // e.g. https://docs.google.com/forms/d/e/<FORM_ID>/formResponse
+      entries?: {
+        name?: string; // e.g. entry.123456789
+        email?: string; // e.g. entry.987654321
+        content?: string; // e.g. entry.111222333
+      };
+    };
   };
   resume: {
     fileDataUrl?: string; // optional base64 data URL

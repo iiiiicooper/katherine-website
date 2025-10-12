@@ -59,7 +59,51 @@ export const ContactHome = (): JSX.Element => {
       setSubmitted("Submitted. We'll contact you soon.");
       setTimeout(() => setSubmitted(""), 2000);
     };
-    // 后端优先：发送到 /api/messages 并在管理后台显示
+    // 若配置了 Google Forms，则优先提交到 Google Forms（无后端依赖）
+    const gf = cfg.contact.googleForm;
+    if (gf?.endpoint && gf.entries?.name && gf.entries?.email && gf.entries?.content) {
+      try {
+        // 采用隐藏 form + iframe 的方式跨域提交，不跳转页面
+        const iframeName = "gform-target";
+        let iframe = document.querySelector(`iframe[name="${iframeName}"]`) as HTMLIFrameElement | null;
+        if (!iframe) {
+          iframe = document.createElement("iframe");
+          iframe.name = iframeName;
+          iframe.style.display = "none";
+          document.body.appendChild(iframe);
+        }
+        const form = document.createElement("form");
+        form.action = gf.endpoint;
+        form.method = "POST";
+        form.target = iframeName;
+        form.style.display = "none";
+        const add = (name: string, value: string) => {
+          const input = document.createElement("input");
+          input.type = "hidden";
+          input.name = name;
+          input.value = value;
+          form.appendChild(input);
+        };
+        add(gf.entries.name, payload.name);
+        add(gf.entries.email, payload.email);
+        add(gf.entries.content, payload.content);
+        // Google Forms 推荐的附加参数，避免草稿/分页问题
+        add("fvv", "1");
+        add("draftResponse", "[]");
+        add("pageHistory", "0");
+        document.body.appendChild(form);
+        form.submit();
+        setSubmitted("Submitted via Google Forms.");
+        setTimeout(() => setSubmitted(""), 2000);
+        // 同步写入本地，便于当前设备回看
+        try { addMessage(payload); } catch {}
+        clearForm();
+        return;
+      } catch {
+        // 失败则继续走后端/本地回退逻辑
+      }
+    }
+    // 后端优先：发送到 /api/messages 并在管理后台显示（若未配置 Google Forms）
     (async () => {
       try {
         const res = await fetch("/api/messages", {

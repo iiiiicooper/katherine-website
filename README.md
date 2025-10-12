@@ -39,3 +39,19 @@
 - 不要手动编辑 `dist/` 文件，构建会覆盖。
 - 修改页面或逻辑请在 `src/` 或 `public/`，然后重新构建。
 - 本地开发环境未模拟 `/api/upload` 与 `/api/messages`，仅 `GET/PUT /api/config` 在 Vite 插件中做了简化代理；如需测试上传与留言，请在部署环境或自行在本地提供后端。
+
+联系方式（Contact）
+
+支持两种提交方式：
+- 后端存储：向 `/api/messages` 提交（生产使用 Vercel Blob，开发使用本地内存）。
+- Google Forms：前端直接跨域提交到你的 Google 表单，无需后端。
+
+使用 Google Forms（免后端）：
+1. 在 Google Forms 创建一个表单，包含三个输入：Name、Email、Message（名称随意）。
+2. 打开表单页面，在浏览器开发者工具中检查每个输入框，找到其 `name` 属性，形如 `entry.1234567890`，记录这三个值。
+3. 获取提交地址：`https://docs.google.com/forms/d/e/<FORM_ID>/formResponse`（可在页面源代码或网络面板中找到）。
+4. 打开管理后台 `/admin` → Contact 管理，填写：
+   - 表单提交地址（`.../formResponse`）
+   - 三个字段的 `entry` 名称：`entry.<name>`、`entry.<email>`、`entry.<content>`
+5. 保存后，前端联系页会通过隐藏 `form + iframe` 方式跨域提交到 Google Forms，不会跳转离开页面。
+6. 管理后台会显示一个“Google Forms”提示链接（跳转到 `viewform` 页面），用于查看实时响应。注意：Google Forms 响应不会出现在“用户留言管理”的列表中，该列表仅显示后端或本地数据。
