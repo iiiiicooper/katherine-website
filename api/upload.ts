@@ -32,16 +32,19 @@ export default async function handler(req: Request): Promise<Response> {
       contentType = file?.type || undefined;
       filename = file?.name || null;
     } else {
-      // Node runtime: parse query for filename/prefix and read raw body
+      // Node runtime: parse query for filename/prefix and forward raw body stream
       const url = new URL(req.url, "http://localhost");
       filename = url.searchParams.get("filename");
       prefix = url.searchParams.get("prefix") || "uploads/";
+      // read content-type from node headers structure
+      const h: any = (req as any).headers;
+      contentType = (typeof h?.get === "function" ? h.get("content-type") : h?.["content-type"]) || "application/octet-stream";
     }
 
-    // Size limit check
+    // Size limit check (only possible with formData). For raw stream, rely on client pre-check.
     const maxBytes = 10 * 1024 * 1024; // 10MB
     let key = "";
-    let bodyForUpload: BodyInit;
+    let bodyForUpload: any;
 
     if (file) {
       if (file.size > maxBytes) {
@@ -51,16 +54,13 @@ export default async function handler(req: Request): Promise<Response> {
       key = `${prefix}${Date.now()}_${safeName}`;
       bodyForUpload = file;
     } else {
-      const buf = await req.arrayBuffer();
-      if (!buf || buf.byteLength === 0) {
+      const stream = (req as any).body;
+      if (!stream) {
         return json({ error: "empty_body" }, 400);
-      }
-      if (buf.byteLength > maxBytes) {
-        return json({ error: "file_too_large", detail: "max 10MB" }, 413);
       }
       const safeName = (filename || `upload_${Date.now()}`).replace(/[^a-zA-Z0-9._-]/g, "_");
       key = `${prefix}${Date.now()}_${safeName}`;
-      bodyForUpload = Buffer.from(buf);
+      bodyForUpload = stream;
     }
 
     try {
