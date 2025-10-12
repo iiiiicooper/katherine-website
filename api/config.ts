@@ -1,6 +1,4 @@
-export const config = { runtime: "edge" };
-
-import { put } from "@vercel/blob";
+export const runtime = "edge";
 
 // Avoid importing frontend modules into Edge runtime; define a minimal default here
 const DEFAULT_CONFIG = {
@@ -87,6 +85,8 @@ const DEFAULT_CONFIG = {
   resume: {},
 };
 
+// Edge 环境不使用 Node/undici 依赖，后续如需写入远端存储，
+// 建议改用 Blob 的 HTTP API（纯 fetch 实现），此处暂不引入 SDK。
 const token: string | undefined =
   (globalThis as any)?.process?.env?.BLOB_READ_WRITE_TOKEN ?? (globalThis as any)?.BLOB_READ_WRITE_TOKEN;
 
@@ -96,13 +96,10 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "Content-Type",
 };
 
-async function putJsonPrivate(path: string, json: string) {
-  return put(path, json, {
-    contentType: "application/json",
-    access: "private" as any,
-    addRandomSuffix: false,
-    token,
-  } as any);
+// 暂不直接写入 Blob（避免 Edge 不支持的模块）。
+// 如需持久化，可在后续改为调用 Blob 的 HTTP 接口。
+async function putJsonPrivate(_path: string, _json: string) {
+  throw new Error("blob_unavailable");
 }
 
 export default async function handler(req: Request): Promise<Response> {
