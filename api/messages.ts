@@ -36,7 +36,9 @@ export default async function handler(req: Request): Promise<Response> {
     return new Response(null, { status: 204, headers: corsHeaders });
   }
 
-  const url = new URL(req.url);
+  // In Node runtime, req.url can be a relative path; provide a base.
+  const base = `http://${req.headers.get("host") || "localhost"}`;
+  const url = new URL(req.url, base);
   const id = url.searchParams.get("id");
 
   try {
