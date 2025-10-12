@@ -1,6 +1,6 @@
 export const config = { runtime: "edge" };
 
-import { put, list } from "@vercel/blob";
+import { put } from "@vercel/blob";
 
 // Avoid importing frontend modules into Edge runtime; define a minimal default here
 const DEFAULT_CONFIG = {
@@ -112,22 +112,7 @@ export default async function handler(req: Request): Promise<Response> {
 
   try {
     if (req.method === "GET") {
-      // load current config (gracefully fall back if Blob not available)
-      try {
-        const items = await list({ prefix: "config/", token });
-        const current = items.blobs.find((b) => b.pathname === "config/current.json");
-        if (current) {
-          const url = (current as any).downloadUrl ?? current.url;
-          const r = await fetch(url);
-          if (r.ok) {
-            const json = await r.text();
-            return jsonResponse({ ok: true, data: JSON.parse(json) });
-          }
-        }
-      } catch {
-        // ignore Blob errors and fall back to default
-      }
-      // fallback to default without importing frontend modules
+      // For Edge compatibility, avoid Blob listing; return default/fallback
       return jsonResponse({ ok: true, data: DEFAULT_CONFIG });
     }
 
@@ -148,20 +133,7 @@ export default async function handler(req: Request): Promise<Response> {
         // Blob unavailable: report non-blocking error so frontend can continue
         return jsonResponse({ ok: false, error: "blob_unavailable" }, 503);
       }
-      // keep last 3 versions
-      try {
-        const items = await list({ prefix: "config/", token });
-        const versions = items.blobs
-          .filter((b) => b.pathname.startsWith("config/") && b.pathname !== "config/current.json")
-          .map((b) => ({ path: b.pathname, ts: Number(b.pathname.replace(/^config\/(\d+)\.json$/, "$1")) }))
-          .filter((v) => !Number.isNaN(v.ts))
-          .sort((a, b) => b.ts - a.ts);
-        const keep = versions.slice(0, 3).map((v) => v.path);
-        // no deletion here to simplify; Vercel Blob API requires del, which we can add later
-        // respond OK
-      } catch {
-        // ignore
-      }
+      // No listing/cleanup on Edge to avoid unsupported modules
       return jsonResponse({ ok: true });
     }
 
