@@ -140,13 +140,13 @@ export const ContactHome = (): JSX.Element => {
   return (
     <div className="bg-white w-full min-h-screen relative">
       <Helmet>
-        <title>联系 Katherine | 留言与合作</title>
+        <title>联系 Katherine Fang | 留言与合作</title>
         <meta name="description" content={contactDescription} />
         {(() => {
           const SITE_URL = (import.meta as any)?.env?.VITE_SITE_URL || (typeof window !== 'undefined' ? window.location.origin : 'https://www.katherinefang.com');
           return <link rel="canonical" href={`${SITE_URL}/contact`} />;
         })()}
-        <meta property="og:title" content="联系 Katherine" />
+        <meta property="og:title" content="联系 Katherine Fang" />
         <meta property="og:description" content={contactDescription} />
         <meta property="og:type" content="website" />
         {(() => {
@@ -157,6 +157,14 @@ export const ContactHome = (): JSX.Element => {
               <meta property="og:image" content={`${SITE_URL}/screen.png`} />
             </>
           );
+        })()}
+        {/* Twitter meta */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="联系 Katherine Fang" />
+        <meta name="twitter:description" content={contactDescription} />
+        {(() => {
+          const SITE_URL = (import.meta as any)?.env?.VITE_SITE_URL || (typeof window !== 'undefined' ? window.location.origin : 'https://www.katherinefang.com');
+          return <meta name="twitter:image" content={`${SITE_URL}/screen.png`} />;
         })()}
       </Helmet>
       {/* 顶部菜单栏（与 AboutHome 保持一致样式） */}

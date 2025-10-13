@@ -50,14 +50,14 @@ export const ProjectDetail = (): JSX.Element => {
   return (
     <div className="bg-white w-full min-h-screen relative">
       <Helmet>
-        <title>{project.title} | 项目详情</title>
+        <title>{project.title} | 项目详情 | Katherine Fang</title>
         <meta name="description" content={(assets[0]?.caption || assets[0]?.alt || project.alt || (project.copyBlocks && project.copyBlocks.find((b:any)=>b.kind==='paragraph')?.text) || `${project.title} 项目详情与设计展示`)} />
         {(() => {
           const SITE_URL = (import.meta as any)?.env?.VITE_SITE_URL || (typeof window !== 'undefined' ? window.location.origin : 'https://www.katherinefang.com');
           const href = typeof window !== 'undefined' ? window.location.href : `${SITE_URL}/project/${project.id}`;
           return <link rel="canonical" href={href} />;
         })()}
-        <meta property="og:title" content={`${project.title} | 项目详情`} />
+        <meta property="og:title" content={`${project.title} | 项目详情 | Katherine Fang`} />
         <meta property="og:description" content={(assets[0]?.caption || assets[0]?.alt || project.alt || `${project.title} 设计展示`)} />
         <meta property="og:type" content="article" />
         {(() => {
@@ -70,6 +70,15 @@ export const ProjectDetail = (): JSX.Element => {
               <meta property="og:image" content={img} />
             </>
           );
+        })()}
+        {/* Twitter meta */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={`${project.title} | 项目详情 | Katherine Fang`} />
+        <meta name="twitter:description" content={(assets[0]?.caption || assets[0]?.alt || project.alt || `${project.title} 设计展示`)} />
+        {(() => {
+          const SITE_URL = (import.meta as any)?.env?.VITE_SITE_URL || (typeof window !== 'undefined' ? window.location.origin : 'https://www.katherinefang.com');
+          const img = (project.previewSrc ? `${SITE_URL}${project.previewSrc}` : `${SITE_URL}/screen.png`);
+          return <meta name="twitter:image" content={img} />;
         })()}
       </Helmet>
       {/* 顶部菜单栏（复用首页样式） */}
