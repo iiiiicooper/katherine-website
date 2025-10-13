@@ -138,19 +138,19 @@ export const ContactHome = (): JSX.Element => {
     })();
   };
 
-  // 为 SEO 描述构建安全文案（不依赖不存在的 contact.intro 字段）
-  const contactDescription = `联系 Katherine：邮箱 ${cfg.contact.email}，LinkedIn 与电话 ${cfg.contact.phone}。`;
+  // Build an English SEO description safely (no contact.intro field dependency)
+  const contactDescription = `Contact Katherine: Email ${cfg.contact.email}, LinkedIn, Phone ${cfg.contact.phone}.`;
 
   return (
     <div className="bg-white w-full min-h-screen relative">
       <Helmet>
-        <title>联系 Katherine Fang | 留言与合作</title>
+        <title>Contact Katherine Fang | Get in Touch</title>
         <meta name="description" content={contactDescription} />
         {(() => {
           const SITE_URL = (import.meta as any)?.env?.VITE_SITE_URL || (typeof window !== 'undefined' ? window.location.origin : 'https://www.katherinefang.com');
           return <link rel="canonical" href={`${SITE_URL}/contact`} />;
         })()}
-        <meta property="og:title" content="联系 Katherine Fang" />
+        <meta property="og:title" content="Contact Katherine Fang" />
         <meta property="og:description" content={contactDescription} />
         <meta property="og:type" content="website" />
         {(() => {
@@ -164,7 +164,7 @@ export const ContactHome = (): JSX.Element => {
         })()}
         {/* Twitter meta */}
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="联系 Katherine Fang" />
+        <meta name="twitter:title" content="Contact Katherine Fang" />
         <meta name="twitter:description" content={contactDescription} />
         {(() => {
           const SITE_URL = (import.meta as any)?.env?.VITE_SITE_URL || (typeof window !== 'undefined' ? window.location.origin : 'https://www.katherinefang.com');

@@ -101,14 +101,14 @@ export const AboutHome = (): JSX.Element => {
   return (
     <div className="bg-white w-full relative">
       <Helmet>
-        <title>Katherine Fang | 关于、项目与联系</title>
-        <meta name="description" content={config.about?.intro || "Katherine 的个人作品集主页：关于、项目与联系。"} />
+        <title>Katherine Fang | About, Projects & Contact</title>
+        <meta name="description" content={config.about?.intro || "Portfolio homepage: About, Projects & Contact."} />
         {(() => {
           const SITE_URL = (import.meta as any)?.env?.VITE_SITE_URL || (typeof window !== 'undefined' ? window.location.origin : 'https://www.katherinefang.com');
           return <link rel="canonical" href={`${SITE_URL}/`} />;
         })()}
-        <meta property="og:title" content="Katherine Fang | 作品集主页" />
-        <meta property="og:description" content={config.about?.intro || "作品集主页，包含关于、项目与联系。"} />
+        <meta property="og:title" content="Katherine Fang | Portfolio" />
+        <meta property="og:description" content={config.about?.intro || "Portfolio homepage with About, Projects & Contact."} />
         <meta property="og:type" content="website" />
         {(() => {
           const SITE_URL = (import.meta as any)?.env?.VITE_SITE_URL || (typeof window !== 'undefined' ? window.location.origin : 'https://www.katherinefang.com');
@@ -121,8 +121,8 @@ export const AboutHome = (): JSX.Element => {
         })()}
         {/* Twitter meta */}
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="Katherine Fang | 关于、项目与联系" />
-        <meta name="twitter:description" content={config.about?.intro || "作品集主页，包含关于、项目与联系。"} />
+        <meta name="twitter:title" content="Katherine Fang | About, Projects & Contact" />
+        <meta name="twitter:description" content={config.about?.intro || "Portfolio homepage with About, Projects & Contact."} />
         {(() => {
           const SITE_URL = (import.meta as any)?.env?.VITE_SITE_URL || (typeof window !== 'undefined' ? window.location.origin : 'https://www.katherinefang.com');
           return <meta name="twitter:image" content={`${SITE_URL}/screen.png`} />;
@@ -135,7 +135,7 @@ export const AboutHome = (): JSX.Element => {
             "@type": "Person",
             name: "Katherine Fang",
             jobTitle: "Product & UI/UX Designer",
-            description: config.about?.intro || "Katherine Fang 的作品集主页",
+            description: config.about?.intro || "Katherine Fang's portfolio homepage",
             url: `${SITE_URL}/`,
             image: `${SITE_URL}/screen.png`,
             sameAs: [config.contact.linkedin].filter(Boolean),
