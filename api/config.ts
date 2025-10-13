@@ -81,6 +81,15 @@ const DEFAULT_CONFIG = {
     email: "katherine77778@outlook.com",
     phone: "+1 857-272-1995",
     linkedin: "https://www.linkedin.com/in/katherine-fang-92752b338/",
+    // Provide default Google Forms config so production works without manual Admin setup
+    googleForm: {
+      endpoint: "https://docs.google.com/forms/d/e/1FAIpQLSczsJb70xRpdkBGYjG5Wrt37yIIb-wBAVnWMNSQ11ttjCjWwA/formResponse",
+      entries: {
+        // name intentionally omitted (can be set via Admin). Email/content are enough for non-required name.
+        email: "entry.943448880",
+        content: "entry.892292611",
+      },
+    },
   },
   resume: {},
 };

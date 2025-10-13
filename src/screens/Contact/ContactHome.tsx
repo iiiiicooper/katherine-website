@@ -62,7 +62,9 @@ export const ContactHome = (): JSX.Element => {
     };
     // 若配置了 Google Forms，则优先提交到 Google Forms（无后端依赖）
     const gf = cfg.contact.googleForm;
-    if (gf?.endpoint && gf.entries?.name && gf.entries?.email && gf.entries?.content) {
+    // 线上常见问题：未配置 name 的 entry，但 email/content 已配置。
+    // 放宽为：只要 endpoint、email、content 可用就提交；name 有则一并提交。
+    if (gf?.endpoint && gf.entries?.email && gf.entries?.content) {
       try {
         // 采用隐藏 form + iframe 的方式跨域提交，不跳转页面
         const iframeName = "gform-target";
@@ -85,7 +87,7 @@ export const ContactHome = (): JSX.Element => {
           input.value = value;
           form.appendChild(input);
         };
-        add(gf.entries.name, payload.name);
+        if (gf.entries?.name) add(gf.entries.name, payload.name);
         add(gf.entries.email, payload.email);
         add(gf.entries.content, payload.content);
         // 若表单启用了“收集邮箱地址”，同步提交系统字段 emailAddress
@@ -142,7 +144,7 @@ export const ContactHome = (): JSX.Element => {
   const contactDescription = `Contact Katherine: Email ${cfg.contact.email}, LinkedIn, Phone ${cfg.contact.phone}.`;
 
   return (
-    <div className="bg-white w-full min-h-screen relative">
+    <div className="bg-white w-full min-h-screen flex flex-col">
       <Helmet>
         <title>Contact Katherine Fang | Get in Touch</title>
         <meta name="description" content={contactDescription} />
@@ -220,7 +222,7 @@ export const ContactHome = (): JSX.Element => {
       </header>
 
       {/* 中间内容：表单居中并整体下移 */}
-      <main className="px-4 sm:px-6 md:px-[151px] pt-16 sm:pt-24 md:pt-32 pb-12">
+      <main className="px-4 sm:px-6 md:px-[151px] pt-16 sm:pt-24 md:pt-32 pb-0 md:pb-6 flex-1">
         <div className="w-full max-w-[686px] mx-auto">
           <div className="space-y-3">
             <input
