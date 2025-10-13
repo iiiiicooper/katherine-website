@@ -322,7 +322,14 @@ export const AdminHome = (): JSX.Element => {
                   onChange={(e) => setCfg({ ...cfg, contact: { ...cfg.contact, googleForm: { ...(cfg.contact.googleForm || {}), entries: { ...(cfg.contact.googleForm?.entries || {}), content: e.target.value } } } })}
                 />
               </div>
+              <input
+                className="w-full h-10 border rounded px-3"
+                placeholder="fbzx（可选：表单会话令牌）"
+                value={cfg.contact.googleForm?.fbzx || ""}
+                onChange={(e) => setCfg({ ...cfg, contact: { ...cfg.contact, googleForm: { ...(cfg.contact.googleForm || {}), fbzx: e.target.value } } })}
+              />
               <div className="text-xs text-gray-500">提示：在 Google Forms 打开表单，右键检查输入框，复制每个字段的 name（形如 entry.123456）。</div>
+              <div className="text-xs text-gray-500">若你的表单启用了“收集邮箱地址”，前端会同时提交系统字段 <code>emailAddress</code>；部分复杂表单可能需要 <code>fbzx</code>（在预填链接或网络请求中可找到）。</div>
             </div>
             <Button disabled={saving} onClick={() => persistConfig(cfg)}>保存</Button>
           </CardContent>

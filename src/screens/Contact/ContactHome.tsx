@@ -88,6 +88,10 @@ export const ContactHome = (): JSX.Element => {
         add(gf.entries.name, payload.name);
         add(gf.entries.email, payload.email);
         add(gf.entries.content, payload.content);
+        // 若表单启用了“收集邮箱地址”，同步提交系统字段 emailAddress
+        add("emailAddress", payload.email);
+        // 部分表单需要会话令牌 fbzx（在预填链接或网络面板中可获得）
+        if (gf.fbzx) add("fbzx", gf.fbzx);
         // Google Forms 推荐的附加参数，避免草稿/分页问题
         add("fvv", "1");
         add("draftResponse", "[]");

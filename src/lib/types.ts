@@ -71,6 +71,7 @@ export type AppConfig = {
     linkedin: string;
     googleForm?: {
       endpoint?: string; // e.g. https://docs.google.com/forms/d/e/<FORM_ID>/formResponse
+      fbzx?: string; // optional session token required by some forms
       entries?: {
         name?: string; // e.g. entry.123456789
         email?: string; // e.g. entry.987654321
