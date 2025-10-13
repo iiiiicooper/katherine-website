@@ -1,4 +1,5 @@
 import React from "react";
+import { Helmet } from "react-helmet-async";
 // 移除卡片容器相关导入
 import { Button } from "../../components/ui/button";
 import { loadConfig, loadRemoteConfig } from "../../lib/config";
@@ -133,8 +134,31 @@ export const ContactHome = (): JSX.Element => {
     })();
   };
 
+  // 为 SEO 描述构建安全文案（不依赖不存在的 contact.intro 字段）
+  const contactDescription = `联系 Katherine：邮箱 ${cfg.contact.email}，LinkedIn 与电话 ${cfg.contact.phone}。`;
+
   return (
     <div className="bg-white w-full min-h-screen relative">
+      <Helmet>
+        <title>联系 Katherine | 留言与合作</title>
+        <meta name="description" content={contactDescription} />
+        {(() => {
+          const SITE_URL = (import.meta as any)?.env?.VITE_SITE_URL || (typeof window !== 'undefined' ? window.location.origin : 'https://www.katherinefang.com');
+          return <link rel="canonical" href={`${SITE_URL}/contact`} />;
+        })()}
+        <meta property="og:title" content="联系 Katherine" />
+        <meta property="og:description" content={contactDescription} />
+        <meta property="og:type" content="website" />
+        {(() => {
+          const SITE_URL = (import.meta as any)?.env?.VITE_SITE_URL || (typeof window !== 'undefined' ? window.location.origin : 'https://www.katherinefang.com');
+          return (
+            <>
+              <meta property="og:url" content={typeof window !== 'undefined' ? window.location.href : `${SITE_URL}/contact`} />
+              <meta property="og:image" content={`${SITE_URL}/screen.png`} />
+            </>
+          );
+        })()}
+      </Helmet>
       {/* 顶部菜单栏（与 AboutHome 保持一致样式） */}
       <header className="relative z-10">
         <nav className="flex items-center px-4 sm:px-6 md:px-11 py-6 sm:py-8 md:py-11">
@@ -223,6 +247,7 @@ export const ContactHome = (): JSX.Element => {
           className="w-full h-[200px] sm:h-[240px] md:h-[369px] object-cover"
           alt="Footer gradient background"
           src="/-----x3d----9-9------.png"
+          loading="lazy"
         />
 
         <div className="absolute inset-0 px-4 sm:px-6 md:px-[151px] flex items-center justify-center md:justify-start gap-3 md:gap-4">

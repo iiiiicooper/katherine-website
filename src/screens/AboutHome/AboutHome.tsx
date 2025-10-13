@@ -1,5 +1,6 @@
 import { Copy as CopyIcon, FileDown as FileDownIcon, Maximize2 as Maximize2Icon, Menu as MenuIcon } from "lucide-react";
 import React from "react";
+import { Helmet } from "react-helmet-async";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent } from "../../components/ui/card";
 import { cn } from "../../lib/utils";
@@ -99,10 +100,31 @@ export const AboutHome = (): JSX.Element => {
   }, []);
   return (
     <div className="bg-white w-full relative">
+      <Helmet>
+        <title>Katherine | 关于、项目与联系</title>
+        <meta name="description" content={config.about?.intro || "Katherine 的个人作品集主页：关于、项目与联系。"} />
+        {(() => {
+          const SITE_URL = (import.meta as any)?.env?.VITE_SITE_URL || (typeof window !== 'undefined' ? window.location.origin : 'https://www.katherinefang.com');
+          return <link rel="canonical" href={`${SITE_URL}/`} />;
+        })()}
+        <meta property="og:title" content="Katherine 作品集主页" />
+        <meta property="og:description" content={config.about?.intro || "作品集主页，包含关于、项目与联系。"} />
+        <meta property="og:type" content="website" />
+        {(() => {
+          const SITE_URL = (import.meta as any)?.env?.VITE_SITE_URL || (typeof window !== 'undefined' ? window.location.origin : 'https://www.katherinefang.com');
+          return (
+            <>
+              <meta property="og:url" content={typeof window !== 'undefined' ? window.location.href : `${SITE_URL}/`} />
+              <meta property="og:image" content={`${SITE_URL}/screen.png`} />
+            </>
+          );
+        })()}
+      </Helmet>
       <img
         className="block absolute pointer-events-none w-[85%] sm:w-[65%] md:w-[57.25%] h-[180px] sm:h-[250px] md:h-[318px] top-[100px] sm:top-[136px] md:top-[151px] left-[52%] sm:left-[54%] -translate-x-1/2 md:left-[256px] md:translate-x-0"
         alt="Background gradient"
         src="/rectangle.png"
+        loading="lazy"
       />
 
       <header className="relative z-10">
@@ -158,13 +180,14 @@ export const AboutHome = (): JSX.Element => {
           </div>
         )}
 
-        {false && (
-          <img
-            className="w-full h-[3px] object-cover"
-            alt="Divider line"
-            src="/line-1.svg"
-          />
-        )}
+          {false && (
+            <img
+              className="w-full h-[3px] object-cover"
+              alt="Divider line"
+              src="/line-1.svg"
+              loading="lazy"
+            />
+          )}
       </header>
 
       <main className="relative">
@@ -214,11 +237,13 @@ export const AboutHome = (): JSX.Element => {
                           className="absolute w-[81.01%] h-[98.18%] top-0 left-[9.50%]"
                           alt="Laptop screen"
                           src={screenSrc}
+                          loading="lazy"
                         />
                         <img
                           className="absolute w-full h-[2.95%] top-[97.05%] left-0"
                           alt="Laptop base"
                           src={baseSrc}
+                          loading="lazy"
                         />
                       </>
                     );
@@ -228,6 +253,7 @@ export const AboutHome = (): JSX.Element => {
                       className="w-full h-full object-cover transition-transform duration-300 ease-out transform-gpu origin-center"
                       alt={project.alt || project.title}
                       src={project.homePreviewSrc ?? project.previewSrc}
+                      loading="lazy"
                     />
                   </div>
                 </div>
@@ -388,6 +414,7 @@ export const AboutHome = (): JSX.Element => {
            className="w-full h-[34vw] sm:h-[28vw] md:h-[22vw] max-h-[369px] object-cover"
            alt="Footer gradient background"
            src="/-----x3d----9-9------.png"
+           loading="lazy"
          />
 
         <div className="absolute inset-0 px-4 sm:px-6 md:px-[151px] flex items-center justify-center md:justify-start gap-3 md:gap-4">

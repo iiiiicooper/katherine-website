@@ -1,4 +1,5 @@
 import React from "react";
+import { Helmet } from "react-helmet-async";
 import { useParams, Link } from "react-router-dom";
 import { Button } from "../../components/ui/button";
 import { loadConfig, loadRemoteConfig } from "../../lib/config";
@@ -48,6 +49,29 @@ export const ProjectDetail = (): JSX.Element => {
 
   return (
     <div className="bg-white w-full min-h-screen relative">
+      <Helmet>
+        <title>{project.title} | 项目详情</title>
+        <meta name="description" content={(assets[0]?.caption || assets[0]?.alt || project.alt || (project.copyBlocks && project.copyBlocks.find((b:any)=>b.kind==='paragraph')?.text) || `${project.title} 项目详情与设计展示`)} />
+        {(() => {
+          const SITE_URL = (import.meta as any)?.env?.VITE_SITE_URL || (typeof window !== 'undefined' ? window.location.origin : 'https://www.katherinefang.com');
+          const href = typeof window !== 'undefined' ? window.location.href : `${SITE_URL}/project/${project.id}`;
+          return <link rel="canonical" href={href} />;
+        })()}
+        <meta property="og:title" content={`${project.title} | 项目详情`} />
+        <meta property="og:description" content={(assets[0]?.caption || assets[0]?.alt || project.alt || `${project.title} 设计展示`)} />
+        <meta property="og:type" content="article" />
+        {(() => {
+          const SITE_URL = (import.meta as any)?.env?.VITE_SITE_URL || (typeof window !== 'undefined' ? window.location.origin : 'https://www.katherinefang.com');
+          const href = typeof window !== 'undefined' ? window.location.href : `${SITE_URL}/project/${project.id}`;
+          const img = (project.previewSrc ? `${SITE_URL}${project.previewSrc}` : `${SITE_URL}/screen.png`);
+          return (
+            <>
+              <meta property="og:url" content={href} />
+              <meta property="og:image" content={img} />
+            </>
+          );
+        })()}
+      </Helmet>
       {/* 顶部菜单栏（复用首页样式） */}
       <header className="relative z-10">
         <nav className="flex items-center px-4 sm:px-6 md:px-11 py-6 sm:py-8 md:py-11">
@@ -113,6 +137,7 @@ export const ProjectDetail = (): JSX.Element => {
                       src={project.previewSrc}
                       alt={project.alt ?? project.title}
                       className="w-full md:max-w-[280px] lg:max-w-[320px] h-auto object-cover rounded-xl shadow-sm justify-self-start"
+                      loading="lazy"
                     />
                   )}
                   {/* 右侧标题（使用配置中的标题）*/}
@@ -137,6 +162,7 @@ export const ProjectDetail = (): JSX.Element => {
                   src={project.previewSrc}
                   alt={project.alt ?? project.title}
                   className="w-full md:max-w-[280px] lg:max-w-[320px] h-auto object-cover rounded-xl shadow-sm justify-self-start"
+                  loading="lazy"
                 />
               )}
               {/* 右侧标题与外链按钮 */}
@@ -172,6 +198,7 @@ export const ProjectDetail = (): JSX.Element => {
                         alt={asset.alt ?? project.title}
                         className="w-full h-auto rounded-xl shadow-sm mx-auto justify-self-center"
                         style={{ width: `${asset.sizePercent ?? 100}%` }}
+                        loading="lazy"
                       />
                     </div>
                   ) : (
@@ -186,6 +213,7 @@ export const ProjectDetail = (): JSX.Element => {
                           alt={asset.alt ?? project.title}
                           className="w-full h-auto rounded-xl shadow-sm mx-auto justify-self-center"
                           style={{ width: `${asset.sizePercent ?? 100}%` }}
+                          loading="lazy"
                         />
                       </div>
                     ) : (
@@ -198,6 +226,7 @@ export const ProjectDetail = (): JSX.Element => {
                               alt={asset.alt ?? project.title}
                               className="w-full h-auto rounded-xl shadow-sm"
                               style={{ width: `${asset.sizePercent ?? 100}%` }}
+                              loading="lazy"
                             />
                             <p className="[font-family:'Inter',Helvetica] font-medium text-black text-[clamp(15px,2.2vw,20px)] tracking-[0] leading-relaxed text-left">
                               {asset.caption || asset.alt || project.title}
@@ -213,6 +242,7 @@ export const ProjectDetail = (): JSX.Element => {
                               alt={asset.alt ?? project.title}
                               className="w-full h-auto rounded-xl shadow-sm"
                               style={{ width: `${asset.sizePercent ?? 100}%` }}
+                              loading="lazy"
                             />
                           </>
                         )}
@@ -232,6 +262,7 @@ export const ProjectDetail = (): JSX.Element => {
                       src={project.previewSrc}
                       alt={project.alt ?? project.title}
                       className="w-full h-auto rounded-xl shadow-sm"
+                      loading="lazy"
                     />
                   )}
                   {!!(project.copyBlocks && project.copyBlocks.length > 0) && (
@@ -255,6 +286,7 @@ export const ProjectDetail = (): JSX.Element => {
                       src={project.previewSrc}
                       alt={project.alt ?? project.title}
                       className="w-full h-auto rounded-xl shadow-sm"
+                      loading="lazy"
                     />
                   )}
                 </div>
@@ -280,6 +312,7 @@ export const ProjectDetail = (): JSX.Element => {
                     src={src}
                     alt={(project.alt ?? project.title) + ` UI ${idx + 1}`}
                     className="w-full h-auto rounded-xl shadow-sm object-cover"
+                    loading="lazy"
                   />
                 ))}
               </div>
@@ -296,6 +329,7 @@ export const ProjectDetail = (): JSX.Element => {
           className="w-full h-[200px] sm:h-[240px] md:h-[369px] object-cover"
           alt="Footer gradient background"
           src="/-----x3d----9-9------.png"
+          loading="lazy"
         />
 
         <div className="absolute inset-0 px-4 sm:px-6 md:px-[151px] flex items-center justify-center md:justify-start gap-3 md:gap-4">
