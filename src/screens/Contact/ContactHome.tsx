@@ -62,9 +62,13 @@ export const ContactHome = (): JSX.Element => {
     };
     // 若配置了 Google Forms，则优先提交到 Google Forms（无后端依赖）
     const gf = cfg.contact.googleForm;
-    // 线上常见问题：未配置 name 的 entry，但 email/content 已配置。
-    // 放宽为：只要 endpoint、email、content 可用就提交；name 有则一并提交。
-    if (gf?.endpoint && gf.entries?.email && gf.entries?.content) {
+    // 若已配置 Google Forms endpoint，但缺少必填 entry（name/email/content），提示配置不完整并停止回退，避免误以为提交成功
+    if (gf?.endpoint && !(gf.entries?.name && gf.entries?.email && gf.entries?.content)) {
+      setSubmitted("Submission temporarily unavailable: Google Form not fully configured (missing Name/Email/Content entry IDs). Please try again later.");
+      return;
+    }
+    // 三个 entry 都齐全时，走 Google Forms 提交
+    if (gf?.endpoint && gf.entries?.name && gf.entries?.email && gf.entries?.content) {
       try {
         // 采用隐藏 form + iframe 的方式跨域提交，不跳转页面
         const iframeName = "gform-target";
@@ -87,7 +91,7 @@ export const ContactHome = (): JSX.Element => {
           input.value = value;
           form.appendChild(input);
         };
-        if (gf.entries?.name) add(gf.entries.name, payload.name);
+        add(gf.entries.name, payload.name);
         add(gf.entries.email, payload.email);
         add(gf.entries.content, payload.content);
         // 若表单启用了“收集邮箱地址”，同步提交系统字段 emailAddress
