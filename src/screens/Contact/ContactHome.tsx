@@ -80,7 +80,9 @@ export const ContactHome = (): JSX.Element => {
           document.body.appendChild(iframe);
         }
         const form = document.createElement("form");
-        form.action = gf.endpoint;
+        // 规范 Google Forms 端点：若误填为 viewform，则替换为 formResponse
+        const normalizedEndpoint = (gf.endpoint || "").replace(/\/viewform(\?|$)/, "/formResponse$1");
+        form.action = normalizedEndpoint;
         form.method = "POST";
         form.target = iframeName;
         form.style.display = "none";

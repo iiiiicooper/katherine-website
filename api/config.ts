@@ -85,7 +85,8 @@ const DEFAULT_CONFIG = {
     googleForm: {
       endpoint: "https://docs.google.com/forms/d/e/1FAIpQLSczsJb70xRpdkBGYjG5Wrt37yIIb-wBAVnWMNSQ11ttjCjWwA/formResponse",
       entries: {
-        // name intentionally omitted (can be set via Admin). Email/content are enough for non-required name.
+        // name entry from provided prefilled link
+        name: "entry.1875613538",
         email: "entry.943448880",
         content: "entry.892292611",
       },
