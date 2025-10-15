@@ -7,16 +7,20 @@ module.exports = function handler(req, res) {
   }
 
   try {
-    // 构建文件路径
-    const filePath = path.join(process.cwd(), 'public', 'uploads', 'Katherine Fang-CV-New York University.pdf');
+    // 尝试不同的文件路径
+    let filePath = path.join(process.cwd(), 'uploads', 'Katherine Fang-CV-New York University.pdf');
+    let fileBuffer;
     
-    // 检查文件是否存在
     if (!fs.existsSync(filePath)) {
-      return res.status(404).json({ message: 'File not found' });
+      // 尝试备用路径
+      filePath = path.join(process.cwd(), 'public', 'uploads', 'Katherine Fang-CV-New York University.pdf');
+      if (!fs.existsSync(filePath)) {
+        return res.status(404).json({ message: 'File not found' });
+      }
     }
-
+    
     // 读取文件
-    const fileBuffer = fs.readFileSync(filePath);
+    fileBuffer = fs.readFileSync(filePath);
     
     // 设置响应头
     res.setHeader('Content-Type', 'application/pdf');
