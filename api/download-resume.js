@@ -7,20 +7,37 @@ module.exports = function handler(req, res) {
   }
 
   try {
-    // 尝试不同的文件路径
-    let filePath = path.join(process.cwd(), 'uploads', 'Katherine Fang-CV-New York University.pdf');
-    let fileBuffer;
+    // 在Vercel环境中，public目录的内容会被复制到根目录
+    // 所以我们需要检查多个可能的路径
+    const fileName = 'Katherine Fang-CV-New York University.pdf';
+    const possiblePaths = [
+      // Vercel部署后的路径（public内容在根目录）
+      path.join(process.cwd(), 'uploads', fileName),
+      // 开发环境路径
+      path.join(process.cwd(), 'public', 'uploads', fileName),
+      // 备用路径
+      path.join(process.cwd(), 'dist', 'uploads', fileName)
+    ];
     
-    if (!fs.existsSync(filePath)) {
-      // 尝试备用路径
-      filePath = path.join(process.cwd(), 'public', 'uploads', 'Katherine Fang-CV-New York University.pdf');
-      if (!fs.existsSync(filePath)) {
-        return res.status(404).json({ message: 'File not found' });
+    let filePath = null;
+    let fileBuffer = null;
+    
+    // 尝试找到文件
+    for (const testPath of possiblePaths) {
+      if (fs.existsSync(testPath)) {
+        filePath = testPath;
+        break;
       }
+    }
+    
+    if (!filePath) {
+      console.error('File not found in any of the paths:', possiblePaths);
+      return res.status(404).json({ message: 'File not found' });
     }
     
     // 读取文件
     fileBuffer = fs.readFileSync(filePath);
+    console.log('File found and read successfully from:', filePath);
     
     // 设置响应头
     res.setHeader('Content-Type', 'application/pdf');
