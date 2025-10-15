@@ -75,8 +75,8 @@
     }
   },
   "resume": {
-    "fileUrl": "/uploads/Katherine Fang-CV-New York University.pdf",
-    "fileName": "Katherine Fang-CV-New York University.pdf",
+    "fileUrl": "/uploads/Katherine%20Fang-CV-New%20York%20University.pdf",
+    "fileName": "Katherine_Fang-CV-New_York_University.pdf",
     "uploadedAt": "2025-01-15T10:00:00.000Z"
   }
 }
