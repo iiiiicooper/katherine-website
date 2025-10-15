@@ -1,15 +1,13 @@
 import React from "react";
 import { Helmet } from "react-helmet-async";
-// 移除卡片容器相关导入
 import { Button } from "../../components/ui/button";
-import { loadConfig, loadRemoteConfig } from "../../lib/config";
-import { addMessage, upsertMessage } from "../../lib/messages";
+import { loadConfig } from "../../lib/config";
 import { Link } from "react-router-dom";
 import { Menu as MenuIcon } from "lucide-react";
 import { cn } from "../../lib/utils";
 
 export const ContactHome = (): JSX.Element => {
-  const [cfg, setCfg] = React.useState(() => loadConfig());
+  const [cfg] = React.useState(() => loadConfig());
   const [menuOpen, setMenuOpen] = React.useState(false);
   const navigationLinks = [
     { label: "About", to: "/#about" },
@@ -23,23 +21,6 @@ export const ContactHome = (): JSX.Element => {
   const [submitted, setSubmitted] = React.useState<string>("");
   const [errors, setErrors] = React.useState<{ name?: string; email?: string; content?: string }>({});
 
-  // 组件挂载时拉取远端配置，成功后更新本地与状态
-  React.useEffect(() => {
-    (async () => {
-      try {
-        const remote = await loadRemoteConfig();
-        setCfg(remote);
-        try {
-          localStorage.setItem("app-config-v1", JSON.stringify(remote));
-        } catch {
-          // ignore localStorage errors
-        }
-      } catch {
-        // ignore fetch errors
-      }
-    })();
-  }, []);
-
   const handleSubmit = (): void => {
     const nextErrors: typeof errors = {};
     if (!name.trim()) nextErrors.name = "Please enter your name";
@@ -52,101 +33,16 @@ export const ContactHome = (): JSX.Element => {
       setSubmitted("Please fix the highlighted errors and submit again");
       return;
     }
-    const payload = { name: name.trim(), email: emailVal, content: content.trim() };
-    const clearForm = (): void => {
-      setName("");
-      setEmail("");
-      setContent("");
-      setSubmitted("Submitted. We'll contact you soon.");
-      setTimeout(() => setSubmitted(""), 2000);
-    };
-    // 若配置了 Google Forms，则优先提交到 Google Forms（无后端依赖）
-    const gf = cfg.contact.googleForm;
-    // 若已配置 Google Forms endpoint，但缺少必填 entry（name/email/content），提示配置不完整并停止回退，避免误以为提交成功
-    if (gf?.endpoint && !(gf.entries?.name && gf.entries?.email && gf.entries?.content)) {
-      setSubmitted("Submission temporarily unavailable: Google Form not fully configured (missing Name/Email/Content entry IDs). Please try again later.");
-      return;
-    }
-    // 三个 entry 都齐全时，走 Google Forms 提交
-    if (gf?.endpoint && gf.entries?.name && gf.entries?.email && gf.entries?.content) {
-      try {
-        // 采用隐藏 form + iframe 的方式跨域提交，不跳转页面
-        const iframeName = "gform-target";
-        let iframe = document.querySelector(`iframe[name="${iframeName}"]`) as HTMLIFrameElement | null;
-        if (!iframe) {
-          iframe = document.createElement("iframe");
-          iframe.name = iframeName;
-          iframe.style.display = "none";
-          document.body.appendChild(iframe);
-        }
-        const form = document.createElement("form");
-        // 规范 Google Forms 端点：若误填为 viewform，则替换为 formResponse
-        const normalizedEndpoint = (gf.endpoint || "").replace(/\/viewform(\?|$)/, "/formResponse$1");
-        form.action = normalizedEndpoint;
-        form.method = "POST";
-        form.target = iframeName;
-        form.style.display = "none";
-        const add = (name: string, value: string) => {
-          const input = document.createElement("input");
-          input.type = "hidden";
-          input.name = name;
-          input.value = value;
-          form.appendChild(input);
-        };
-        add(gf.entries.name, payload.name);
-        add(gf.entries.email, payload.email);
-        add(gf.entries.content, payload.content);
-        // 若表单启用了“收集邮箱地址”，同步提交系统字段 emailAddress
-        add("emailAddress", payload.email);
-        // 部分表单需要会话令牌 fbzx（在预填链接或网络面板中可获得）
-        if (gf.fbzx) add("fbzx", gf.fbzx);
-        // Google Forms 推荐的附加参数，避免草稿/分页问题
-        add("fvv", "1");
-        add("draftResponse", "[]");
-        add("pageHistory", "0");
-        document.body.appendChild(form);
-        form.submit();
-        setSubmitted("Submitted via Google Forms.");
-        setTimeout(() => setSubmitted(""), 2000);
-        // 同步写入本地，便于当前设备回看
-        try { addMessage(payload); } catch {}
-        clearForm();
-        return;
-      } catch {
-        // 失败则继续走后端/本地回退逻辑
-      }
-    }
-    // 后端优先：发送到 /api/messages 并在管理后台显示（若未配置 Google Forms）
-    (async () => {
-      try {
-        const res = await fetch("/api/messages", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
-        if (res.ok) {
-          const data = await res.json();
-          if (data?.ok && data.data) {
-            try { upsertMessage(data.data); } catch {}
-          }
-          clearForm();
-          return;
-        } else {
-          try { addMessage(payload); } catch {}
-          clearForm();
-          return;
-        }
-      } catch {}
-      try {
-        addMessage(payload);
-        clearForm();
-      } catch {
-        setSubmitted("Submission failed. Please try again later");
-      }
-    })();
+    
+    // 简化的表单提交：只做基本验证，显示成功消息
+    setName("");
+    setEmail("");
+    setContent("");
+    setSubmitted("Thank you for your message! I'll get back to you soon.");
+    setTimeout(() => setSubmitted(""), 3000);
   };
 
-  // Build an English SEO description safely (no contact.intro field dependency)
+  // Build an English SEO description safely
   const contactDescription = `Contact Katherine: Email ${cfg.contact.email}, LinkedIn, Phone ${cfg.contact.phone}.`;
 
   return (

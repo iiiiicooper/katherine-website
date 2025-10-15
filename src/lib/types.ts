@@ -86,13 +86,3 @@ export type AppConfig = {
     uploadedAt?: string; // ISO date string when uploaded
   };
 };
-
-export type ContactMessage = {
-  id: string;
-  name: string;
-  email: string;
-  content: string;
-  createdAt: string; // ISO string
-  preferredChannel?: "email" | "phone" | "linkedin";
-  status?: "unread" | "replied";
-};

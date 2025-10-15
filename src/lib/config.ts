@@ -100,38 +100,6 @@ export function loadConfig(): AppConfig {
   }
 }
 
-// 尝试从后端拉取配置（存在则返回），否则返回本地/默认
-export async function loadRemoteConfig(): Promise<AppConfig> {
-  try {
-    const res = await fetch("/api/config");
-    if (res.ok) {
-      const data = await res.json();
-      if (data?.ok && data.data) {
-        return data.data as AppConfig;
-      }
-    }
-  } catch {
-    // ignore
-  }
-  return loadConfig();
-}
-
 export function saveConfig(cfg: AppConfig): void {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(cfg));
-}
-
-export function resetConfig(): AppConfig {
-  saveConfig(defaultConfig);
-  return defaultConfig;
-}
-
-export function exportConfig(): string {
-  return JSON.stringify(loadConfig(), null, 2);
-}
-
-export async function importConfigFromFile(file: File): Promise<AppConfig> {
-  const text = await file.text();
-  const parsed = JSON.parse(text) as AppConfig;
-  saveConfig(parsed);
-  return parsed;
 }

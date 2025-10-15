@@ -2,7 +2,7 @@ import React from "react";
 import { Helmet } from "react-helmet-async";
 import { useParams, Link } from "react-router-dom";
 import { Button } from "../../components/ui/button";
-import { loadConfig, loadRemoteConfig } from "../../lib/config";
+import { loadConfig } from "../../lib/config";
 import { cn } from "../../lib/utils";
 import { Menu as MenuIcon } from "lucide-react";
 
@@ -29,11 +29,7 @@ export const ProjectDetail = (): JSX.Element => {
   }, []);
 
   React.useEffect(() => {
-    (async () => {
-      const remote = await loadRemoteConfig();
-      setCfg(remote);
-      try { localStorage.setItem("app-config-v1", JSON.stringify(remote)); } catch {}
-    })();
+    setCfg(loadConfig());
   }, []);
 
   if (!project) {

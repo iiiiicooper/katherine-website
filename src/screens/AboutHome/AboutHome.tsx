@@ -4,7 +4,7 @@ import { Helmet } from "react-helmet-async";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent } from "../../components/ui/card";
 import { cn } from "../../lib/utils";
-import { loadConfig, loadRemoteConfig, defaultConfig } from "../../lib/config";
+import { loadConfig } from "../../lib/config";
 import { Link } from "react-router-dom";
 
 const navigationLinks = [
@@ -36,19 +36,7 @@ export const AboutHome = (): JSX.Element => {
   };
 
   React.useEffect(() => {
-    // 尝试拉取远端配置，成功则更新并保存到本地
-    (async () => {
-      const remote = await loadRemoteConfig();
-      const localNow = loadConfig();
-      const isRemoteDefault = JSON.stringify(remote) === JSON.stringify(defaultConfig);
-      if (!isRemoteDefault && JSON.stringify(remote) !== JSON.stringify(localNow)) {
-        setConfig(remote);
-        try { localStorage.setItem("app-config-v1", JSON.stringify(remote)); } catch {}
-      } else {
-        setConfig(localNow);
-      }
-    })();
-
+    // 设置页面滚动监听，用于导航高亮
     const ids = ["about", "project", "contact", "resume"];
     const observer = new IntersectionObserver(
       (entries) => {
@@ -68,33 +56,15 @@ export const AboutHome = (): JSX.Element => {
     return () => observer.disconnect();
   }, []);
 
-  // 自动刷新：窗口获得焦点或本地存储变化时更新配置，避免简历链接仍指向旧资源
+  // 监听本地存储变化，更新配置
   React.useEffect(() => {
-    const refresh = async () => {
-      try {
-        const remote = await loadRemoteConfig();
-        const localNow = loadConfig();
-        const isRemoteDefault = JSON.stringify(remote) === JSON.stringify(defaultConfig);
-        if (!isRemoteDefault && JSON.stringify(remote) !== JSON.stringify(localNow)) {
-          setConfig(remote);
-          try { localStorage.setItem("app-config-v1", JSON.stringify(remote)); } catch {}
-        } else {
-          setConfig(localNow);
-        }
-      } catch {
-        try { setConfig(loadConfig()); } catch {}
-      }
-    };
-    const onFocus = () => { refresh(); };
     const onStorage = (e: StorageEvent) => {
       if (e.key === "app-config-v1") {
         try { setConfig(loadConfig()); } catch {}
       }
     };
-    window.addEventListener("focus", onFocus);
     window.addEventListener("storage", onStorage);
     return () => {
-      window.removeEventListener("focus", onFocus);
       window.removeEventListener("storage", onStorage);
     };
   }, []);
