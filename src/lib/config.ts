@@ -104,7 +104,7 @@ let cachedConfig: AppConfig | null = null;
 
 export async function loadConfigFromFile(): Promise<AppConfig> {
   try {
-    const response = await fetch('/data/app-config.json');
+    const response = await fetch('/app-config.json');
     if (!response.ok) {
       console.warn('Failed to load app-config.json, using default config');
       return defaultConfig;

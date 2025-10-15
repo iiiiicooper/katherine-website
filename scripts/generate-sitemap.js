@@ -6,7 +6,7 @@ const origin = process.env.SITEMAP_ORIGIN || 'https://www.katherinefang.com';
 const routes = ['/', '/contact'];
 
 try {
-  const cfgPath = resolve(process.cwd(), 'data/app-config.json');
+  const cfgPath = resolve(process.cwd(), 'public/app-config.json');
   const raw = readFileSync(cfgPath, 'utf-8');
   const cfg = JSON.parse(raw);
   const ids = Array.isArray(cfg?.projects) ? cfg.projects.map(p => p.id).filter(Boolean) : [];

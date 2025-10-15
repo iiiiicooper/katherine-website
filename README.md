@@ -33,7 +33,7 @@ Katherine Fang 的个人作品集网站，展示 UI/UX 设计项目和联系信�
 1. 在 Google Forms 创建一个表单，包含三个输入：Name、Email、Message（名称随意）。
 2. 打开表单页面，在浏览器开发者工具中检查每个输入框，找到其 `name` 属性，形如 `entry.1234567890`，记录这三个值。
 3. 获取提交地址：`https://docs.google.com/forms/d/e/<FORM_ID>/formResponse`（可在页面源代码或网络面板中找到）。
-4. 在 `data/app-config.json` 中配置 Google Forms 信息：
+4. 在 `public/app-config.json` 中配置 Google Forms 信息：
    ```json
    {
      "contact": {
