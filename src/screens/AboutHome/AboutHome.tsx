@@ -388,10 +388,11 @@ export const AboutHome = (): JSX.Element => {
               className="w-[260px] h-[56px] sm:w-[320px] sm:h-[72px] md:w-[362px] md:h-[88px] gap-2 px-6 py-3 sm:px-8 sm:py-3 md:px-10 md:py-4 rounded-[36px] sm:rounded-[42px] md:rounded-[47px] bg-[linear-gradient(270deg,rgba(238,212,189,1)_0%,rgba(254,159,96,1)_100%)] hover:opacity-90 transition-opacity"
             >
               {(() => {
-                const fileName = config.resume?.fileName || "Katherine-Fang-CV.pdf";
+                const fileName = config.resume?.fileName || "Katherine_Fang-CV-New_York_University.pdf";
+                const fileUrl = "/uploads/Katherine_Fang-CV-New_York_University.pdf";
                 
                 return (
-                  <a href="/api/download-resume" download={fileName}>
+                  <a href={fileUrl} download={fileName}>
                     <span className="[font-family:'Inter',Helvetica] font-bold text-black text-lg sm:text-xl md:text-2xl text-center tracking-[0] leading-[normal]">
                       Download My CV
                     </span>
