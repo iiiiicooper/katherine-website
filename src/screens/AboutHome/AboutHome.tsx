@@ -249,28 +249,15 @@ export const AboutHome = (): JSX.Element => {
                   onMouseEnter={() => setHoverProjectIndex(index)}
                   onMouseLeave={() => setHoverProjectIndex(null)}
                 >
-                  {/** 根据索引选择不同的装饰屏幕与底座 */}
-                  {(() => {
-                    const screenSrc = index % 2 === 0 ? "/screen-1.png" : "/screen.png";
-                    const baseSrc = index % 2 === 0 ? "/base-1.png" : "/base.png";
-                    return (
-                      <>
-                        <img
-                          className="absolute w-[81.01%] h-[98.18%] top-0 left-[9.50%]"
-                          alt="Laptop screen"
-                          src={screenSrc}
-                          loading="lazy"
-                        />
-                        <img
-                          className="absolute w-full h-[2.95%] top-[97.05%] left-0"
-                          alt="Laptop base"
-                          src={baseSrc}
-                          loading="lazy"
-                        />
-                      </>
-                    );
-                  })()}
-                  <div className="absolute top-[8px] left-[28px] w-[204px] h-[128px] sm:top-[10px] sm:left-[36px] sm:w-[250px] sm:h-[156px] md:top-[11px] md:left-[42px] md:w-[287px] md:h-[180px] overflow-hidden rounded-sm">
+                  {/** 使用完整的笔记本背景图片 */}
+                  <img
+                    className="absolute w-full h-full top-0 left-0 object-contain"
+                    alt="Notebook frame"
+                    src="/Notebook.webp"
+                    loading="lazy"
+                  />
+                  {/** 项目图片显示区域 - 调整位置以适配新的笔记本框架 */}
+                  <div className="absolute top-[12px] left-[32px] w-[196px] h-[120px] sm:top-[15px] sm:left-[40px] sm:w-[240px] sm:h-[148px] md:top-[18px] md:left-[46px] md:w-[279px] md:h-[172px] overflow-hidden rounded-sm">
                     <img
                       className="w-full h-full object-cover transition-transform duration-300 ease-out transform-gpu origin-center"
                       alt={project.alt || project.title}
