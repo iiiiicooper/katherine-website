@@ -25,7 +25,7 @@
     }
   ],
   "rewrites": [
-    { "source": "/((?!api/)(?!uploads/)(?!.*\\.(png|jpg|jpeg|svg|webp|css|js|pdf|txt|ico)).*)", "destination": "/index.html" }
+    { "source": "/((?!api|uploads).*)", "destination": "/index.html" }
   ],
   "redirects": [
     { "source": "/home", "destination": "/" },
