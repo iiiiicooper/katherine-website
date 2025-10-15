@@ -9,7 +9,7 @@ module.exports = function handler(req, res) {
   try {
     // 在Vercel环境中，public目录的内容会被复制到根目录
     // 所以我们需要检查多个可能的路径
-    const fileName = 'Katherine Fang-CV-New York University.pdf';
+    const fileName = 'Katherine_Fang-CV-New_York_University.pdf';
     const possiblePaths = [
       // Vercel部署后的路径（public内容在根目录）
       path.join(process.cwd(), 'uploads', fileName),
