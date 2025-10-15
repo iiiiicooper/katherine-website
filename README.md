@@ -2,6 +2,8 @@
 
 Katherine Fang 的个人作品集网站，展示 UI/UX 设计项目和联系信息。
 
+Last updated: 2025-01-15
+
 ## 运行与构建
 
 - 开发启动：`npm run dev`，默认在本地开启 Vite 开发服务器。
