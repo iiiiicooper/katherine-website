@@ -9,7 +9,7 @@
       "title": "uSpeedo.ai",
       "previewSrc": "/p1-logo.png",
       "homePreviewSrc": "/p1-1.jpeg",
-      "liveUrl": "https://example.com/project-1",
+      "liveUrl": "https://uspeedo.ai/",
       "alt": "uSpeedo.ai logo",
       "shortDesc": "A sample project one.",
       "tags": ["UI", "UX"],
@@ -40,7 +40,7 @@
       "title": "Fazhi legal AI",
       "previewSrc": "/p2-logo.png",
       "homePreviewSrc": "/p2-1.png",
-      "liveUrl": "https://example.com/project-2",
+      "liveUrl": "https://www.fazhi.law/law-saas/gpt",
       "alt": "Project 2 logo",
       "shortDesc": "A sample project two.",
       "tags": ["UI", "UX"],
@@ -75,8 +75,8 @@
     }
   },
   "resume": {
-    "fileUrl": "/uploads/p1-3.jpeg__1_.pdf",
-    "fileName": "p1-3.jpeg (1).pdf",
-    "uploadedAt": "2025-10-12T13:01:06.910Z"
+    "fileUrl": "/uploads/Katherine Fang-CV-New York University.pdf",
+    "fileName": "Katherine Fang-CV-New York University.pdf",
+    "uploadedAt": "2025-01-15T10:00:00.000Z"
   }
 }

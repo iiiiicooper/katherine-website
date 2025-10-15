@@ -84,22 +84,69 @@ export const defaultConfig: AppConfig = {
     email: "katherine77778@outlook.com",
     phone: "+1 857-272-1995",
     linkedin: "https://www.linkedin.com/in/katherine-fang-92752b338/",
+    googleForm: {
+      endpoint: "https://docs.google.com/forms/d/e/1FAIpQLSczsJb70xRpdkBGYjG5Wrt37yIIb-wBAVnWMNSQ11ttjCjWwA/formResponse",
+      entries: {
+        name: "entry.1875613538",
+        email: "entry.943448880",
+        content: "entry.892292611"
+      }
+    }
   },
   resume: {
+    fileUrl: "/uploads/Katherine Fang-CV-New York University.pdf",
+    fileName: "Katherine Fang-CV-New York University.pdf",
+    uploadedAt: "2025-01-15T10:00:00.000Z"
   },
 };
+
+let cachedConfig: AppConfig | null = null;
+
+export async function loadConfigFromFile(): Promise<AppConfig> {
+  try {
+    const response = await fetch('/data/app-config.json');
+    if (!response.ok) {
+      console.warn('Failed to load app-config.json, using default config');
+      return defaultConfig;
+    }
+    const fileConfig = await response.json() as AppConfig;
+    return { ...defaultConfig, ...fileConfig };
+  } catch (error) {
+    console.warn('Error loading app-config.json:', error);
+    return defaultConfig;
+  }
+}
 
 export function loadConfig(): AppConfig {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return defaultConfig;
+    if (!raw) {
+      cachedConfig = defaultConfig;
+      return defaultConfig;
+    }
     const parsed = JSON.parse(raw) as AppConfig;
-    return { ...defaultConfig, ...parsed };
+    cachedConfig = { ...defaultConfig, ...parsed };
+    return cachedConfig;
   } catch {
+    cachedConfig = defaultConfig;
+    return defaultConfig;
+  }
+}
+
+// 初始化配置的函数
+export async function initializeConfig(): Promise<AppConfig> {
+  try {
+    const fileConfig = await loadConfigFromFile();
+    cachedConfig = fileConfig;
+    return fileConfig;
+  } catch (error) {
+    console.warn('Failed to initialize config from file:', error);
+    cachedConfig = defaultConfig;
     return defaultConfig;
   }
 }
 
 export function saveConfig(cfg: AppConfig): void {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(cfg));
+  cachedConfig = cfg;
 }

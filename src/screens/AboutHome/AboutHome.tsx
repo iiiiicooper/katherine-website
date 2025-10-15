@@ -4,7 +4,7 @@ import { Helmet } from "react-helmet-async";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent } from "../../components/ui/card";
 import { cn } from "../../lib/utils";
-import { loadConfig } from "../../lib/config";
+import { loadConfig, initializeConfig } from "../../lib/config";
 import { Link } from "react-router-dom";
 
 const navigationLinks = [
@@ -23,6 +23,19 @@ export const AboutHome = (): JSX.Element => {
   const [activeSection, setActiveSection] = React.useState("about");
   const [menuOpen, setMenuOpen] = React.useState(false);
   const [hoverProjectIndex, setHoverProjectIndex] = React.useState<number | null>(null);
+
+  // 异步加载配置
+  React.useEffect(() => {
+    const loadConfigAsync = async () => {
+      try {
+        const newConfig = await initializeConfig();
+        setConfig(newConfig);
+      } catch (error) {
+        console.error('Failed to load config:', error);
+      }
+    };
+    loadConfigAsync();
+  }, []);
 
   const handleCopy = async (): Promise<void> => {
     try {
@@ -375,37 +388,16 @@ export const AboutHome = (): JSX.Element => {
               className="w-[260px] h-[56px] sm:w-[320px] sm:h-[72px] md:w-[362px] md:h-[88px] gap-2 px-6 py-3 sm:px-8 sm:py-3 md:px-10 md:py-4 rounded-[36px] sm:rounded-[42px] md:rounded-[47px] bg-[linear-gradient(270deg,rgba(238,212,189,1)_0%,rgba(254,159,96,1)_100%)] hover:opacity-90 transition-opacity"
             >
               {(() => {
-                const resumeUrl = (config.resume as any).fileUrl || config.resume.fileDataUrl || "#";
-                const rawName = config.resume.fileName || (() => {
-                  try {
-                    const u = new URL(resumeUrl, window.location.origin);
-                    const seg = u.pathname.split("/").filter(Boolean);
-                    return seg[seg.length - 1] || "CV";
-                  } catch {
-                    return "CV";
-                  }
-                })();
-                const sanitize = (name: string): string => {
-                  // 去除前缀时间戳和多余扩展名，只保留最后一个扩展名
-                  const cleaned = name.replace(/^[0-9]{8,}[-_]/, "");
-                  const lastDot = cleaned.lastIndexOf(".");
-                  let base = lastDot > 0 ? cleaned.slice(0, lastDot) : cleaned;
-                  const ext = lastDot > 0 ? cleaned.slice(lastDot) : "";
-                  // 如果存在 "-时间戳" 后缀，移除
-                  let base2 = base.replace(/-[0-9]{8,}$/, "");
-                  // 若最终扩展名为 .pdf，且 base 以图片扩展名结尾，则去掉内层图片扩展名
-                  if (/^\.pdf$/i.test(ext)) {
-                    base2 = base2.replace(/\.(png|jpg|jpeg|webp|gif)$/i, "");
-                  }
-                  // 压缩连续空格
-                  const base3 = base2.replace(/\s+/g, " ").trim();
-                  // 默认名称前缀
-                  const prefix = "My CV";
-                  return `${base3 || prefix}${ext || ""}`;
-                };
-                const friendlyName = sanitize(rawName);
+                const resumeUrl = config.resume?.fileUrl || "#";
+                const fileName = config.resume?.fileName || "Katherine-Fang-CV.pdf";
+                
+                // 调试信息
+                console.log('Resume config:', config.resume);
+                console.log('Resume URL:', resumeUrl);
+                console.log('Resume fileName:', fileName);
+                
                 return (
-                  <a href={resumeUrl} download={friendlyName}>
+                  <a href={resumeUrl} download={fileName}>
                     <span className="[font-family:'Inter',Helvetica] font-bold text-black text-lg sm:text-xl md:text-2xl text-center tracking-[0] leading-[normal]">
                       Download My CV
                     </span>

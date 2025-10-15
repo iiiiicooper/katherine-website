@@ -2,7 +2,7 @@ import React from "react";
 import { Helmet } from "react-helmet-async";
 import { useParams, Link } from "react-router-dom";
 import { Button } from "../../components/ui/button";
-import { loadConfig } from "../../lib/config";
+import { loadConfig, initializeConfig } from "../../lib/config";
 import { cn } from "../../lib/utils";
 import { Menu as MenuIcon } from "lucide-react";
 
@@ -29,7 +29,16 @@ export const ProjectDetail = (): JSX.Element => {
   }, []);
 
   React.useEffect(() => {
-    setCfg(loadConfig());
+    const loadLatestConfig = async () => {
+      try {
+        const latestConfig = await initializeConfig();
+        setCfg(latestConfig);
+      } catch (error) {
+        console.error('Failed to load config:', error);
+        setCfg(loadConfig()); // fallback to cached config
+      }
+    };
+    loadLatestConfig();
   }, []);
 
   if (!project) {
