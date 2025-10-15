@@ -389,7 +389,7 @@ export const AboutHome = (): JSX.Element => {
             >
               {(() => {
                 const fileName = config.resume?.fileName || "Katherine_Fang-CV-New_York_University.pdf";
-                const fileUrl = "/uploads/Katherine_Fang-CV-New_York_University.pdf";
+                const fileUrl = "/Katherine_Fang-CV-New_York_University.pdf";
                 
                 return (
                   <a href={fileUrl} download={fileName}>
