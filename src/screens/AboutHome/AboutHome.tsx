@@ -1,4 +1,4 @@
-import { Copy as CopyIcon, FileDown as FileDownIcon, Maximize2 as Maximize2Icon, Menu as MenuIcon } from "lucide-react";
+import { Copy as CopyIcon, FileDown as FileDownIcon, Maximize2 as Maximize2Icon, Menu as MenuIcon, ChevronLeft as ChevronLeftIcon, ChevronRight as ChevronRightIcon } from "lucide-react";
 import React from "react";
 import { Helmet } from "react-helmet-async";
 import { Button } from "../../components/ui/button";
@@ -23,6 +23,11 @@ export const AboutHome = (): JSX.Element => {
   const [activeSection, setActiveSection] = React.useState("about");
   const [menuOpen, setMenuOpen] = React.useState(false);
   const [hoverProjectIndex, setHoverProjectIndex] = React.useState<number | null>(null);
+  const [currentSlide, setCurrentSlide] = React.useState(0);
+  const [isAutoPlaying, setIsAutoPlaying] = React.useState(true);
+  const [touchStart, setTouchStart] = React.useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = React.useState<number | null>(null);
+  const autoPlayRef = React.useRef<NodeJS.Timeout | null>(null);
 
   // 异步加载配置
   React.useEffect(() => {
@@ -48,6 +53,56 @@ export const AboutHome = (): JSX.Element => {
     }
   };
 
+  // 触摸滑动处理函数
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+    setIsAutoPlaying(false); // 暂停自动播放
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > 50;
+    const isRightSwipe = distance < -50;
+
+    if (isLeftSwipe) {
+      // 向左滑动，显示下一个
+      setCurrentSlide((prev) => (prev + 1) % config.projects.length);
+    } else if (isRightSwipe) {
+      // 向右滑动，显示上一个
+      setCurrentSlide((prev) => (prev - 1 + config.projects.length) % config.projects.length);
+    }
+
+    // 3秒后恢复自动播放
+    setTimeout(() => setIsAutoPlaying(true), 3000);
+  };
+
+  // 导航按钮处理函数
+  const handlePrevSlide = () => {
+    setCurrentSlide((prev) => (prev - 1 + config.projects.length) % config.projects.length);
+    setIsAutoPlaying(false);
+    setTimeout(() => setIsAutoPlaying(true), 3000);
+  };
+
+  const handleNextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % config.projects.length);
+    setIsAutoPlaying(false);
+    setTimeout(() => setIsAutoPlaying(true), 3000);
+  };
+
+  // 指示器点击处理函数
+  const handleIndicatorClick = (index: number) => {
+    setCurrentSlide(index);
+    setIsAutoPlaying(false);
+    setTimeout(() => setIsAutoPlaying(true), 3000);
+  };
+
   React.useEffect(() => {
     // 设置页面滚动监听，用于导航高亮
     const ids = ["about", "project", "contact", "resume"];
@@ -68,6 +123,27 @@ export const AboutHome = (): JSX.Element => {
     });
     return () => observer.disconnect();
   }, []);
+
+  // Auto-switch carousel for mobile - continuous left scrolling
+  React.useEffect(() => {
+    if (isAutoPlaying) {
+      autoPlayRef.current = setInterval(() => {
+        setCurrentSlide((prev) => (prev + 1) % config.projects.length);
+      }, 3000); // 3 seconds
+    } else {
+      if (autoPlayRef.current) {
+        clearInterval(autoPlayRef.current);
+        autoPlayRef.current = null;
+      }
+    }
+
+    return () => {
+      if (autoPlayRef.current) {
+        clearInterval(autoPlayRef.current);
+        autoPlayRef.current = null;
+      }
+    };
+  }, [config.projects.length, isAutoPlaying]);
 
   // 监听本地存储变化，更新配置
   React.useEffect(() => {
@@ -224,50 +300,149 @@ export const AboutHome = (): JSX.Element => {
           </div>
         </section>
 
-        <section id="project" className="px-4 sm:px-6 md:px-[151px] pb-[120px] sm:pb-[140px] md:pb-[200px]">
-          <h2 className="[font-family:'Inter',Helvetica] font-medium text-black text-2xl tracking-[0] leading-[normal] mb-[52px] text-left">
+        <section id="project" className="px-4 sm:px-6 md:px-[151px] pb-[80px] sm:pb-[120px] md:pb-[200px]">
+          <h2 className="[font-family:'Inter',Helvetica] font-medium text-black text-xl sm:text-2xl tracking-[0] leading-[normal] mb-[32px] sm:mb-[42px] md:mb-[52px] text-left">
             Project.
           </h2>
 
-          <div className="max-w-[1000px] mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 place-items-center">
-            {config.projects.map((project, index) => (
-              <Link
-                key={project.id}
-                to={`/project/${project.id}`}
-                className={cn(
-                  "w-full sm:w-[360px] md:w-[400px] h-[260px] sm:h-[340px] md:h-[400px] bg-neutral-100 flex items-center justify-center relative overflow-visible rounded-xl shadow-sm hover:shadow-lg transition-shadow hover:z-50 transform-gpu transition-transform transition-opacity duration-200 ease-out",
-                  hoverProjectIndex !== null && hoverProjectIndex !== index
-                    ? "opacity-50 blur-sm scale-90"
-                    : "opacity-100 blur-0 scale-100",
-                )}
-              >
-                <div
-                  className={cn(
-                    "relative w-[260px] h-[142px] sm:w-[320px] sm:h-[176px] md:w-[371px] md:h-[203px] transform-gpu transition-transform duration-200 ease-out origin-center",
-                    hoverProjectIndex === index ? "scale-[2]" : "scale-100",
-                  )}
-                  onMouseEnter={() => setHoverProjectIndex(index)}
-                  onMouseLeave={() => setHoverProjectIndex(null)}
+          {/* Hero Video Section */}
+          <div className="w-full max-w-[750px] mx-auto mb-[40px] sm:mb-[60px] md:mb-[80px] px-2 sm:px-0">
+            <div className="relative w-full aspect-video rounded-xl sm:rounded-2xl overflow-hidden shadow-md sm:shadow-lg bg-gradient-to-br from-purple-100 to-orange-100">
+              <video
+                className="w-full h-full object-cover"
+                src="/Video.mp4"
+                autoPlay
+                muted
+                loop
+                playsInline
+                preload="metadata"
+                aria-label="Project demonstration video"
+              />
+              {/* Optional overlay for better mobile experience */}
+              <div className="absolute inset-0 bg-black/5 pointer-events-none"></div>
+            </div>
+          </div>
+
+          {/* Mobile Carousel - Matching Video Frame Size */}
+          <div className="md:hidden">
+            <div className="relative w-full max-w-[750px] mx-auto px-2 sm:px-0">
+              {/* Carousel Container - Matching Video Frame */}
+              <div className="relative w-full aspect-video rounded-xl sm:rounded-2xl overflow-hidden shadow-md sm:shadow-lg bg-gradient-to-br from-purple-100 to-orange-100">
+                {/* Navigation Buttons */}
+                <button
+                  onClick={handlePrevSlide}
+                  className="absolute left-2 top-1/2 -translate-y-1/2 z-10 w-8 h-8 bg-white/80 hover:bg-white rounded-full flex items-center justify-center shadow-md transition-all duration-200 hover:scale-110"
+                  aria-label="Previous slide"
                 >
-                  {/** 使用完整的笔记本背景图片 */}
-                  <img
-                    className="absolute w-full h-full top-0 left-0 object-contain"
-                    alt="Notebook frame"
-                    src="/Notebook.webp"
-                    loading="lazy"
+                  <ChevronLeftIcon className="w-5 h-5 text-gray-700" />
+                </button>
+                <button
+                  onClick={handleNextSlide}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 z-10 w-8 h-8 bg-white/80 hover:bg-white rounded-full flex items-center justify-center shadow-md transition-all duration-200 hover:scale-110"
+                  aria-label="Next slide"
+                >
+                  <ChevronRightIcon className="w-5 h-5 text-gray-700" />
+                </button>
+                
+                <div 
+                  className="flex h-full transition-transform duration-1000 ease-in-out will-change-transform cursor-grab active:cursor-grabbing"
+                  style={{ 
+                    transform: `translateX(-${currentSlide * 100}%)`,
+                    backfaceVisibility: 'hidden',
+                    perspective: '1000px'
+                  }}
+                  onTouchStart={handleTouchStart}
+                  onTouchMove={handleTouchMove}
+                  onTouchEnd={handleTouchEnd}
+                >
+                  {config.projects.map((project, index) => (
+                    <Link
+                      key={project.id}
+                      to={`/project/${project.id}`}
+                      className="w-full h-full flex-shrink-0 flex items-center justify-center relative transform-gpu will-change-transform"
+                    >
+                      <div className="relative w-[280px] h-[154px] sm:w-[320px] sm:h-[176px] transform-gpu transition-transform duration-200 ease-out origin-center">
+                        {/* Notebook Frame */}
+                        <img
+                          className="absolute w-full h-full top-0 left-0 object-contain transform-gpu"
+                          alt="Notebook frame"
+                          src="/Notebook.webp"
+                          loading="lazy"
+                        />
+                        {/* Project Image */}
+                        <div className="absolute top-[14px] left-[35px] w-[210px] h-[128px] sm:top-[16px] sm:left-[40px] sm:w-[240px] sm:h-[146px] overflow-hidden rounded-sm">
+                          <img
+                            className="w-full h-full object-cover transition-transform duration-300 ease-out transform-gpu origin-center"
+                            alt={project.alt || project.title}
+                            src={project.homePreviewSrc ?? project.previewSrc}
+                            loading="lazy"
+                          />
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+              
+              {/* Carousel Indicators */}
+              <div className="flex justify-center mt-4 gap-2">
+                {config.projects.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => handleIndicatorClick(index)}
+                    className={cn(
+                      "w-2 h-2 rounded-full transition-colors duration-300",
+                      currentSlide === index ? "bg-black" : "bg-gray-300"
+                    )}
+                    aria-label={`Go to slide ${index + 1}`}
                   />
-                  {/** 项目图片显示区域 - 调整位置以适配新的笔记本框架 */}
-                  <div className="absolute top-[12px] left-[32px] w-[196px] h-[120px] sm:top-[15px] sm:left-[40px] sm:w-[240px] sm:h-[148px] md:top-[18px] md:left-[46px] md:w-[279px] md:h-[172px] overflow-hidden rounded-sm">
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Desktop Grid */}
+          <div className="hidden md:block">
+            <div className="max-w-[1000px] mx-auto grid grid-cols-2 gap-8 place-items-center">
+              {config.projects.map((project, index) => (
+                <Link
+                  key={project.id}
+                  to={`/project/${project.id}`}
+                  className={cn(
+                    "w-full max-w-[400px] h-[400px] bg-neutral-100 flex items-center justify-center relative overflow-visible rounded-xl shadow-sm hover:shadow-lg transition-shadow hover:z-50 transform-gpu transition-transform transition-opacity duration-200 ease-out",
+                    hoverProjectIndex !== null && hoverProjectIndex !== index
+                      ? "opacity-50 blur-sm scale-90"
+                      : "opacity-100 blur-0 scale-100",
+                  )}
+                >
+                  <div
+                    className={cn(
+                      "relative w-[371px] h-[203px] transform-gpu transition-transform duration-200 ease-out origin-center",
+                      hoverProjectIndex === index ? "scale-[2]" : "scale-100",
+                    )}
+                    onMouseEnter={() => setHoverProjectIndex(index)}
+                    onMouseLeave={() => setHoverProjectIndex(null)}
+                  >
+                    {/** 使用完整的笔记本背景图片 */}
                     <img
-                      className="w-full h-full object-cover transition-transform duration-300 ease-out transform-gpu origin-center"
-                      alt={project.alt || project.title}
-                      src={project.homePreviewSrc ?? project.previewSrc}
+                      className="absolute w-full h-full top-0 left-0 object-contain"
+                      alt="Notebook frame"
+                      src="/Notebook.webp"
                       loading="lazy"
                     />
+                    {/** 项目图片显示区域 - 调整位置以适配新的笔记本框架 */}
+                    <div className="absolute top-[18px] left-[46px] w-[279px] h-[172px] overflow-hidden rounded-sm">
+                      <img
+                        className="w-full h-full object-cover transition-transform duration-300 ease-out transform-gpu origin-center"
+                        alt={project.alt || project.title}
+                        src={project.homePreviewSrc ?? project.previewSrc}
+                        loading="lazy"
+                      />
+                    </div>
                   </div>
-                </div>
-              </Link>
-            ))}
+                </Link>
+              ))}
+            </div>
           </div>
         </section>
 
