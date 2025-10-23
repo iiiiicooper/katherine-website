@@ -20,10 +20,10 @@ const defaultProjects: ProjectItem[] = [
       { id: "p1-a2", src: "/p1-2.jpeg", alt: "uSpeedo.ai UI 2", caption: "It analyzes trending events and popular BGMs, then generates posts that fit today's trends." },
       { id: "p1-a3", src: "/p1-3.png", alt: "uSpeedo.ai UI 3", caption: "Based on a chatbot, you can input the product link and a prompt to automatically generate images and copy that align with the product’s tone." },
       { id: "p1-a4", src: "/p1-4.png", alt: "uSpeedo.ai UI 4", caption: "Auto-publish your uSpeedo.ai creatives to X, Facebook, LinkedIn, and Instagram, and schedule them ahead of time—without leaving the platform." },
-      { id: "p1-a5", src: "/p1-5.png", alt: "uSpeedo.ai UI 5", caption: "Social Media Background Design", sizePercent: 75 },
-      { id: "p1-a6", src: "/p1-6.png", alt: "uSpeedo.ai UI 6", caption: " ", sizePercent: 75 },
-      { id: "p1-a7", src: "/p1-7.png", alt: "uSpeedo.ai UI 7", caption: "Product Function Poster", sizePercent: 75 },
-      { id: "p1-a8", src: "/p1-8.png", alt: "uSpeedo.ai UI 8", caption: " ", sizePercent: 75 },
+      { id: "p1-a5", src: "/p1-5.png", alt: "uSpeedo.ai UI 5", caption: "Social Media Background Design", sizePercent: 65 },
+      { id: "p1-a6", src: "/p1-6.png", alt: "uSpeedo.ai UI 6", caption: " ", sizePercent: 65 },
+      { id: "p1-a7", src: "/p1-7.png", alt: "uSpeedo.ai UI 7", caption: "Product Function Poster", sizePercent: 65 },
+      { id: "p1-a8", src: "/Project1-8.jpg", alt: "uSpeedo.ai UI 8", caption: " ", sizePercent: 65 },
     ],
     copyBlocks: [
       { id: "p1-c1", kind: "paragraph", text: "uSpeedo.ai is an all-in one AI Marketing platform. Using AI to quickly generate high-quality marketing images for different social media platforms." },
@@ -37,7 +37,7 @@ const defaultProjects: ProjectItem[] = [
       "/p1-5.png",
       "/p1-6.png",
       "/p1-7.png",
-      "/p1-8.png",
+      "/Project1-8.jpg",
     ],
     caseStudySections: [],
     visible: true,
@@ -94,8 +94,8 @@ export const defaultConfig: AppConfig = {
     }
   },
   resume: {
-    fileUrl: "/uploads/Katherine Fang-CV-New York University.pdf",
-    fileName: "Katherine Fang-CV-New York University.pdf",
+    fileUrl: "/Katherine_Fang_UX_CV_New_York_University.pdf",
+    fileName: "Katherine_Fang_UX_CV_New_York_University.pdf",
     uploadedAt: "2025-01-15T10:00:00.000Z"
   },
 };
